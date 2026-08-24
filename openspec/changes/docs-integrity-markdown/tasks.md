@@ -27,12 +27,12 @@ Tests: `python3 -m unittest <module>`. Commits stage only `scripts/`, `AGENTS.md
 
 ## Phase 2: Store+Checker+Update (dep 1)
 
-- [ ] 2.1 RED `store_test` injectable engram path: absent binary=exit3 naming it; empty matches=exit3 missing baseline; corrupted blob=exit3, not tamper; save/export round-trip vs temp dir.
-- [ ] 2.2 GREEN `store.py`: argv lists, shell=False, 30s timeout; upsert `engram save --topic docs-integrity/manifest`; reads via `engram export`.
-- [ ] 2.3 RED `checker_test` fake manifests: clean=exit0; modified=exit1 expected-vs-actual; deleted=exit1 marked; untracked=exit2 names file+flow pointer; mixed=both reported, exit1.
-- [ ] 2.4 Explicit RED: `update` over tamper aborts non-zero; persisted baseline blob byte-unchanged.
-- [ ] 2.5 GREEN `checker.py`: precedence tamper=1 untracked=2 clean=0; operational exit3 short-circuits pre-comparison.
-- [ ] 2.6 GREEN `cli.py`: `check [--project open-code] [--format human\|json]`; `update` admits multiple files; no-op rewrite byte-identical.
+- [x] 2.1 RED `store_test` injectable engram path: absent binary=exit3 naming it; empty matches=exit3 missing baseline; corrupted blob=exit3, not tamper; save/export round-trip vs temp dir.
+- [x] 2.2 GREEN `store.py`: argv lists, shell=False, 30s timeout; upsert `engram save --topic docs-integrity/manifest`; reads via `engram export`.
+- [x] 2.3 RED `checker_test` fake manifests: clean=exit0; modified=exit1 expected-vs-actual; deleted=exit1 marked; untracked=exit2 names file+flow pointer; mixed=both reported, exit1.
+- [x] 2.4 Explicit RED: `update` over tamper aborts non-zero; persisted baseline blob byte-unchanged.
+- [x] 2.5 GREEN `checker.py`: precedence tamper=1 untracked=2 clean=0; operational exit3 short-circuits pre-comparison.
+- [x] 2.6 GREEN `cli.py`: `check [--project open-code] [--format human\|json]`; `update` admits multiple files; no-op rewrite byte-identical.
 
 ## Phase 3: Converter (dep 1)
 
