@@ -7,8 +7,13 @@ any comparison. ``update [--project NAME]`` recomputes the manifest and
 replaces the persisted baseline: refuses with exit 1 (old blob left byte
 untouched) when any tracked file was modified or deleted, admits any
 number of new files at once, rewrites byte-identically on no-op runs,
-and bootstraps a fresh baseline when none exists. ``convert-pdf`` lands
-in Phase 3; until then it falls through to the usage-error path.
+and bootstraps a fresh baseline when none exists. ``convert-pdf [PATH]...``
+converts PDFs into sibling Markdown inside ``docs/`` without ever
+touching sources or the baseline; each PATH must be an existing ``.pdf``
+file under ``docs/``, and with no PATH every ``*.pdf`` under ``docs/``
+is converted (recursive, sorted). Converter operational failures map to
+exit 3 via :class:`docsguard.pdftext.PdftextError`; generated ``.md``
+files stay untracked until admitted through ``update``.
 
 Exit-code note: argparse errors would exit 2, reserved here for the
 untracked warning; usage errors therefore map to exit 3 instead.
@@ -21,7 +26,7 @@ import json
 import os
 import sys
 
-from docsguard import checker, manifest
+from docsguard import checker, manifest, pdftext
 from docsguard.store import EngramStore, StoreError
 
 UPDATE_HINT = "(admit via: python3 scripts/docs_guard.py update)"
@@ -63,6 +68,14 @@ def build_parser() -> _GuardParser:
         "update", help="recompute the manifest and replace the baseline"
     )
     update_cmd.add_argument("--project", default="laboratorios")
+    convert_cmd = subparsers.add_parser(
+        "convert-pdf",
+        help="convert PDFs under docs/ into sibling Markdown files",
+    )
+    convert_cmd.add_argument(
+        "paths", nargs="*", metavar="PATH",
+        help="existing .pdf files under docs/ (default: every *.pdf there)",
+    )
     return parser
 
 
