@@ -1,0 +1,65 @@
+schema: spec-driven
+
+context: |
+  Tech stack: course workspace; host runtimes available (Python 3.12.3, Node 22.21, GNU Make 4.3)
+  Architecture: practice workspace for laboratory coursework (currently ARyS · IF046 · UNPSJB Trelew, security); docs/ holds immutable course PDFs; integrity tooling (docsguard: manifest+store+checker+cli) implemented under scripts/, PDF→Markdown converter pending (Phase 3)
+  Testing: no test runner configured; strict TDD disabled until one lands
+  Style: technical artifacts in English; conventional commits; no AI attribution
+
+testing:
+  strict_tdd: false
+  reason: >-
+    No test runner detected in the workspace on 2026-08-21 (no package.json,
+    pyproject.toml, go.mod, Cargo.toml, Makefile targets, or CI configs).
+    Per decision gate "no test runner -> strict_tdd: false". Host has Python
+    stdlib unittest and Node node:test available for when the first runner is chosen.
+  detected: 2026-08-21
+  test_command: ""
+  layers:
+    unit:
+      available: false
+      tool: ""
+    integration:
+      available: false
+      tool: ""
+    e2e:
+      available: false
+      tool: ""
+  coverage:
+    available: false
+    command: ""
+  quality:
+    linter:
+      available: false
+      command: ""
+    type_checker:
+      available: false
+      command: ""
+    formatter:
+      available: false
+      command: ""
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - NEVER propose changes under docs/ — immutable course material (see AGENTS.md)
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    guidelines:
+      - Follow existing code patterns
+    tdd: false
+    test_command: ""
+  verify:
+    test_command: ""
+    build_command: ""
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
