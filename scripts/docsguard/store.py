@@ -60,7 +60,7 @@ class EngramStore:
     def __init__(
         self,
         binary: str = "engram",
-        project: str = "open-code",
+        project: str = "laboratorios",
         timeout: float = DEFAULT_TIMEOUT_SECONDS,
     ) -> None:
         self.binary = binary

@@ -78,7 +78,7 @@ class CliTestCase(unittest.TestCase):
             data = json.load(fh)
         matches = [
             obs for obs in data["observations"]
-            if obs["project"] == "open-code"
+            if obs["project"] == "laboratorios"
             and obs["title"] == "docs-integrity/manifest"
         ]
         self.assertEqual(len(matches), 1, "expected exactly one baseline observation")
@@ -87,7 +87,7 @@ class CliTestCase(unittest.TestCase):
     def overwrite_baseline(self, raw_content):
         subprocess.run(
             [ENGRAM, "save", "docs-integrity/manifest", raw_content,
-             "--type", "architecture", "--project", "open-code",
+             "--type", "architecture", "--project", "laboratorios",
              "--scope", "project", "--topic", "docs-integrity/manifest"],
             capture_output=True, text=True,
             env=dict(os.environ, ENGRAM_DATA_DIR=self.engram_data), check=True,

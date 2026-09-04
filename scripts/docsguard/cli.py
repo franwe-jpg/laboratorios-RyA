@@ -56,13 +56,13 @@ def build_parser() -> _GuardParser:
     check_cmd = subparsers.add_parser(
         "check", help="compare docs/ against the persisted baseline"
     )
-    check_cmd.add_argument("--project", default="open-code")
+    check_cmd.add_argument("--project", default="laboratorios")
     check_cmd.add_argument("--format", choices=("human", "json"),
                            default="human")
     update_cmd = subparsers.add_parser(
         "update", help="recompute the manifest and replace the baseline"
     )
-    update_cmd.add_argument("--project", default="open-code")
+    update_cmd.add_argument("--project", default="laboratorios")
     return parser
 
 
