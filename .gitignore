@@ -1,0 +1,6 @@
+# Auto-generated skill registry (machine-local tool state, indexes host paths)
+.atl/
+
+# Python
+__pycache__/
+*.py[cod]
