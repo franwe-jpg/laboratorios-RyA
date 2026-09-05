@@ -7,8 +7,10 @@ any comparison. ``update [--project NAME]`` recomputes the manifest and
 replaces the persisted baseline: refuses with exit 1 (old blob left byte
 untouched) when any tracked file was modified or deleted, admits any
 number of new files at once, rewrites byte-identically on no-op runs,
-and bootstraps a fresh baseline when none exists. ``convert-pdf`` lands
-in Phase 3; until then it falls through to the usage-error path.
+and bootstraps a fresh baseline when none exists.
+
+PDF-to-Markdown conversion was dropped: the course material is authored
+in Markdown, so no conversion step is needed.
 
 Exit-code note: argparse errors would exit 2, reserved here for the
 untracked warning; usage errors therefore map to exit 3 instead.
