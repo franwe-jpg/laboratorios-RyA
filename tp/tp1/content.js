@@ -31,19 +31,21 @@ module.exports = {
           "pérdida de integridad del software.",
       },
       {
-        asset: "Archivos con los comandos de conexión a la VM",
-        pillar: "Confidencialidad",
-        justification:
-          "No son la llave, pero son el mapa: usuarios, direcciones y rutas. Le " +
-          "ahorran a un atacante toda la etapa de reconocimiento.",
-      },
-      {
         asset: "Copias locales de bases de datos de producción",
         pillar: "Confidencialidad",
         justification:
           "Contienen datos reales de producción fuera del entorno controlado que " +
           "los protege. Es el activo de mayor exposición: si la notebook se pierde " +
           "o es comprometida, el daño ya está hecho.",
+      },
+      {
+        asset: "Esquema de usuarios y permisos de la base de datos de producción",
+        pillar: "Integridad",
+        justification:
+          "Define quién puede leer y quién puede escribir en producción. Si alguien " +
+          "lo altera y se otorga permisos de escritura, el control de acceso deja de " +
+          "existir sin que nadie se entere. Lo crítico no es que se vea, es que no " +
+          "se modifique.",
       },
       {
         asset: "La VM de producción y los servicios que expone",
