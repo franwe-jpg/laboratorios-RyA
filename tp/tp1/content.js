@@ -7,13 +7,52 @@ module.exports = {
     title: "Trabajo Práctico 1 — Conceptos de Seguridad",
     course: "Auditoría y Seguridad de Sistemas · ARyS · IF046",
     institution: "UNPSJB — Sede Trelew",
-    student: "TODO: Apellido, Nombre",
-    date: "2026",
+    student: "Soler, Franco Martín",
+    date: "Septiembre 2026",
   },
 
   // ---- Parte A: inventario y tríada CIA (analysis, owner-authored) ----
   parteA: {
-    assets: null,        // [{ asset, pillar, justification }]
+    assets: [
+      {
+        asset: "Clave privada (.pem) de acceso a la VM de producción",
+        pillar: "Confidencialidad",
+        justification:
+          "Es la llave de entrada a producción. Si se filtra, un tercero entra con " +
+          "mis mismos permisos. Perderla es recuperable rotando el par de claves; " +
+          "que se filtre, no.",
+      },
+      {
+        asset: "Clave SSH de acceso a los repositorios (frontend y backend)",
+        pillar: "Confidencialidad",
+        justification:
+          "Si se filtra, el atacante no solo lee el código: puede modificarlo y " +
+          "subirlo. La pérdida de confidencialidad de la clave se convierte en " +
+          "pérdida de integridad del software.",
+      },
+      {
+        asset: "Archivos con los comandos de conexión a la VM",
+        pillar: "Confidencialidad",
+        justification:
+          "No son la llave, pero son el mapa: usuarios, direcciones y rutas. Le " +
+          "ahorran a un atacante toda la etapa de reconocimiento.",
+      },
+      {
+        asset: "Copias locales de bases de datos de producción",
+        pillar: "Confidencialidad",
+        justification:
+          "Contienen datos reales de producción fuera del entorno controlado que " +
+          "los protege. Es el activo de mayor exposición: si la notebook se pierde " +
+          "o es comprometida, el daño ya está hecho.",
+      },
+      {
+        asset: "La VM de producción y los servicios que expone",
+        pillar: "Disponibilidad",
+        justification:
+          "Si la VM se cae, los sistemas dejan de operar. Acá el pilar crítico se " +
+          "invierte: importa menos quién ve el contenido que el servicio siga en pie.",
+      },
+    ],
     riskAnalysis: null,  // { asset, threat, vulnerability, impact, likelihood, rationale }
   },
 

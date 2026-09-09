@@ -37,11 +37,14 @@ const transcript = (text) => {
   }));
 };
 
-const table = (headers, rows) => {
-  const colW = Math.floor(PAGE_W / headers.length);
-  const widths = headers.map(() => colW);
-  const cell = (text, bold, fill) => new TableCell({
-    width: { size: colW, type: WidthType.DXA },
+// `ratios` (optional) are relative column weights; defaults to equal columns.
+const table = (headers, rows, ratios) => {
+  const w = ratios || headers.map(() => 1);
+  const total = w.reduce((a, b) => a + b, 0);
+  const widths = w.map((x) => Math.floor((PAGE_W * x) / total));
+  widths[0] += PAGE_W - widths.reduce((a, b) => a + b, 0); // absorb rounding
+  const cell = (text, bold, fill, i) => new TableCell({
+    width: { size: widths[i], type: WidthType.DXA },
     shading: fill ? { type: ShadingType.CLEAR, fill } : undefined,
     margins: { top: 60, bottom: 60, left: 90, right: 90 },
     children: [new Paragraph({ children: [new TextRun({ text: String(text), bold })] })],
@@ -50,8 +53,8 @@ const table = (headers, rows) => {
     columnWidths: widths,
     width: { size: PAGE_W, type: WidthType.DXA },
     rows: [
-      new TableRow({ tableHeader: true, children: headers.map((x) => cell(x, true, "E8E8E8")) }),
-      ...rows.map((r) => new TableRow({ children: r.map((x) => cell(x, false)) })),
+      new TableRow({ tableHeader: true, children: headers.map((x, i) => cell(x, true, "E8E8E8", i)) }),
+      ...rows.map((r) => new TableRow({ children: r.map((x, i) => cell(x, false, null, i)) })),
     ],
   });
 };
@@ -75,7 +78,8 @@ body.push(h("Parte A — El inventario y la tríada", HeadingLevel.HEADING_1));
 body.push(h("A.1 / A.2 — Activos y pilar CIA crítico", HeadingLevel.HEADING_2));
 if (content.parteA.assets) {
   body.push(table(["Activo", "Pilar CIA crítico", "Justificación"],
-    content.parteA.assets.map((a) => [a.asset, a.pillar, a.justification])));
+    content.parteA.assets.map((a) => [a.asset, a.pillar, a.justification]),
+    [28, 24, 48]));
 } else body.push(pending("tabla de cinco activos con su pilar CIA crítico"));
 
 body.push(h("A.3 — Análisis de riesgo del activo principal", HeadingLevel.HEADING_2));
@@ -84,7 +88,7 @@ if (content.parteA.riskAnalysis) {
   body.push(table(["Campo", "Valor"], [
     ["Activo", r.asset], ["Amenaza", r.threat], ["Vulnerabilidad", r.vulnerability],
     ["Impacto", r.impact], ["Probabilidad", r.likelihood],
-  ]));
+  ], [22, 78]));
   body.push(new Paragraph({ spacing: { before: 120 } }));
   body.push(p(r.rationale));
 } else body.push(pending("amenaza, vulnerabilidad y estimación de riesgo"));
@@ -124,7 +128,8 @@ for (const [key, title] of bSections) {
 body.push(h("Parte C — Del riesgo al control", HeadingLevel.HEADING_1));
 if (content.parteC.controls) {
   body.push(table(["Control", "Tipo", "Pilar CIA", "Fundamento"],
-    content.parteC.controls.map((c) => [c.control, c.type, c.pillar, c.rationale])));
+    content.parteC.controls.map((c) => [c.control, c.type, c.pillar, c.rationale]),
+    [28, 16, 14, 42]));
 } else body.push(pending("tabla de dos controles propuestos"));
 if (content.parteC.justification) {
   body.push(new Paragraph({ spacing: { before: 160 } }));
