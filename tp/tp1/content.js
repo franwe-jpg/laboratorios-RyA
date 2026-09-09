@@ -117,7 +117,39 @@ module.exports = {
         "original de 1000 ni me dice qué se modificó. Para eso hace falta otra " +
         "cosa (un backup, un control de versiones), no el hash.",
     },
-    b2: null,
+    b2: {
+      intro:
+        "gpg -c requiere un TTY interactivo para el prompt de contraseña " +
+        "(pinentry), que no se renderizaba bien en la terminal usada; se ejecutó " +
+        "el mismo comando en modo no interactivo (--pinentry-mode loopback) para " +
+        "obtener una transcripción reproducible. El efecto es idéntico al de la " +
+        "consigna: cifrado simétrico con contraseña.",
+      runs: [
+        {
+          caption: "Cifrado",
+          command: "gpg -c orden.txt",
+          output:
+            "-rw-r--r-- 1 root root  31 orden.txt\n" +
+            "-rw-r--r-- 1 root root 110 orden.txt.gpg",
+        },
+        {
+          caption: "Contenido cifrado: binario ilegible",
+          command: "file orden.txt.gpg && cat orden.txt.gpg",
+          output:
+            "orden.txt.gpg: GPG symmetrically encrypted data (AES256 cipher)\n" +
+            "<bytes binarios no imprimibles -- contenido cifrado, no reproducible como texto>",
+        },
+        {
+          caption: "Descifrado",
+          command: "gpg -d orden.txt.gpg",
+          output:
+            "gpg: AES256.CFB encrypted data\n" +
+            "Transferir 9000 a la cuenta 55\n" +
+            "gpg: encrypted with 1 passphrase",
+        },
+      ],
+      answer: null, // owner will write this
+    },
     b3: null,
     b4: null,
   },

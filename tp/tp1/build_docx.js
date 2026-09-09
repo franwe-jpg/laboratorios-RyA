@@ -117,11 +117,11 @@ for (const [key, title] of bSections) {
       children: [new TextRun({ text: run.caption, bold: true, size: 20 })] }));
     body.push(...transcript(run.command ? `$ ${run.command}\n${run.output}` : run.output));
   }
+  body.push(new Paragraph({ spacing: { before: 160, after: 60 },
+    children: [new TextRun({ text: "Respuesta", bold: true })] }));
   if (s.answer) {
-    body.push(new Paragraph({ spacing: { before: 160, after: 60 },
-      children: [new TextRun({ text: "Respuesta", bold: true })] }));
     for (const para of s.answer.split("\n\n")) body.push(p(para));
-  }
+  } else body.push(pending("respuesta a la consigna"));
 }
 
 // ---- Parte C
