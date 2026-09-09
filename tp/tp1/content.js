@@ -55,7 +55,30 @@ module.exports = {
           "invierte: importa menos quién ve el contenido que el servicio siga en pie.",
       },
     ],
-    riskAnalysis: null,  // { asset, threat, vulnerability, impact, likelihood, rationale }
+    riskAnalysis: {
+      asset: "Copias locales de bases de datos de producción",
+      threat:
+        "Acceso físico no autorizado al equipo: robo o extravío de la notebook, " +
+        "o un tercero que aprovecha una sesión desatendida sin bloquear.",
+      vulnerability:
+        "Las copias se guardan sin cifrar en el disco. La contraseña del sistema " +
+        "operativo protege la sesión, no el archivo: alcanza con arrancar desde " +
+        "otro medio o extraer el disco para leerlo en texto plano.",
+      impact: "Alto",
+      likelihood: "Media",
+      rationale:
+        "El impacto es Alto porque las copias contienen datos personales " +
+        "identificables junto con género y orientación política. La Ley 25.326 " +
+        "de Protección de Datos Personales clasifica las opiniones políticas como " +
+        "dato sensible, así que una filtración no solo perjudica a las personas " +
+        "listadas: expone al organismo a responsabilidad legal. Además el daño es " +
+        "irreversible — una clave comprometida se rota, unos datos filtrados no " +
+        "vuelven.\n\n" +
+        "La probabilidad es Media porque habitualmente bloqueo el equipo, lo que " +
+        "reduce la ventana de una sesión desatendida. Pero el bloqueo no cubre el " +
+        "escenario de robo o extravío: sin cifrado de disco, cualquiera con el " +
+        "equipo en la mano llega al archivo.",
+    },
   },
 
   // ---- Parte B: laboratorio (executed evidence) ----

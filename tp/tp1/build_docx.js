@@ -90,7 +90,7 @@ if (content.parteA.riskAnalysis) {
     ["Impacto", r.impact], ["Probabilidad", r.likelihood],
   ], [22, 78]));
   body.push(new Paragraph({ spacing: { before: 120 } }));
-  body.push(p(r.rationale));
+  for (const para of r.rationale.split("\n\n")) body.push(p(para));
 } else body.push(pending("amenaza, vulnerabilidad y estimación de riesgo"));
 
 // ---- Parte B
