@@ -148,7 +148,19 @@ module.exports = {
             "gpg: encrypted with 1 passphrase",
         },
       ],
-      answer: null, // owner will write this
+      answer:
+        "El pilar que protege el cifrado es la confidencialidad: que solo quien " +
+        "tiene la contraseña pueda leer el contenido. Se comprobó arriba con " +
+        "\"file\" y \"cat\": sin la clave, el archivo es indistinguible de ruido.\n\n" +
+        "Si alguien roba orden.txt.gpg pero no la contraseña, la confidencialidad " +
+        "no se viola: el cifrado sigue haciendo su trabajo aunque el archivo ya no " +
+        "esté solo en mi poder. Tener el archivo en la mano no sirve de nada sin la " +
+        "clave.\n\n" +
+        "Si además borra mi única copia, ahí sí pierdo algo, pero es " +
+        "disponibilidad, no integridad: el archivo no fue alterado, simplemente " +
+        "dejó de estar accesible. Integridad hubiera fallado si alguien modificaba " +
+        "el contenido cifrado o el texto original; acá el dato desaparece intacto, " +
+        "no corrupto.",
     },
     b3: null,
     b4: null,
