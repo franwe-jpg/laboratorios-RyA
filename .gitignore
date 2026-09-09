@@ -7,3 +7,5 @@ __pycache__/
 node_modules/
 tp/*/TP1.pdf
 tp/*/page-*.jpg
+tp/*/work/
+.~lock.*#

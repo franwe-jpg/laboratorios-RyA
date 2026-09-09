@@ -162,7 +162,17 @@ module.exports = {
         "el contenido cifrado o el texto original; acá el dato desaparece intacto, " +
         "no corrupto.",
     },
-    b3: null,
+    b3: {
+      runs: [
+        {
+          command: "ls -l orden.txt\nchmod 600 orden.txt\nls -l orden.txt",
+          output:
+            "-rw-r--r-- 1 root root 31 orden.txt\n" +
+            "-rw------- 1 root root 31 orden.txt",
+        },
+      ],
+      answer: null, // owner will write this
+    },
     b4: null,
   },
 
