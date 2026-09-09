@@ -171,7 +171,27 @@ module.exports = {
             "-rw------- 1 root root 31 orden.txt",
         },
       ],
-      answer: null, // owner will write this
+      answer:
+        "chmod 600 son tres dígitos octales, uno por cada audiencia del archivo: " +
+        "dueño, grupo y otros. El 6 (4+2 = lectura+escritura) es para el dueño; " +
+        "los dos 0 restantes son para el grupo y para \"otros\", y significan que " +
+        "esas dos audiencias no tienen ningún permiso.\n\n" +
+        "Esto conecta con dos pilares a la vez: confidencialidad, porque un " +
+        "usuario del sistema que no sea el dueño no puede leer el contenido; e " +
+        "integridad, porque tampoco puede escribirlo ni modificarlo.\n\n" +
+        "Con el principio de menor privilegio la relación es directa: un archivo " +
+        "tiene tres audiencias posibles (dueño, grupo, otros), y 600 le da acceso " +
+        "a exactamente una, la única que efectivamente necesita leer y escribir " +
+        "ese archivo. Ni el grupo ni \"otros\" tienen una razón legítima para " +
+        "tocarlo, así que no reciben ningún permiso: es el mínimo suficiente para " +
+        "que el trabajo se haga, ni un bit más.\n\n" +
+        "La excepción es root, y ya se vio en el ejercicio B.3 anterior: el " +
+        "usuario lab recibió \"Permission denied\" al leer un archivo 600, pero " +
+        "root leyó el mismo archivo sin problema. Esto es porque root no está " +
+        "sujeto a la verificación de permisos de archivos: el kernel directamente " +
+        "no hace esa comprobación cuando el proceso corre como root. chmod " +
+        "protege contra otros usuarios normales del sistema, no contra quien lo " +
+        "administra.",
     },
     b4: null,
   },
