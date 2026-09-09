@@ -83,7 +83,40 @@ module.exports = {
 
   // ---- Parte B: laboratorio (executed evidence) ----
   parteB: {
-    b1: null,  // { intro, runs: [{caption, command, output}], answer }
+    b1: {
+      intro:
+        "Comandos ejecutados dentro del contenedor arys-lab:bookworm " +
+        "(docker run --rm -it -v \"$PWD/tp/tp1/work:/lab\" arys-lab:bookworm).",
+      runs: [
+        {
+          command:
+            'echo "Transferir 1000 a la cuenta 55" > orden.txt\nsha256sum orden.txt',
+          output:
+            "0e1280abab19bbd9cddaedf53cce80db1e7c889c46236115886c12366dcf5859  orden.txt",
+        },
+        {
+          command:
+            'echo "Transferir 9000 a la cuenta 55" > orden.txt\nsha256sum orden.txt',
+          output:
+            "7d943b825c066b4c87ddf9e833d3a206d449beee071b6c3a4d2941239a5b9e5f  orden.txt",
+        },
+      ],
+      answer:
+        "Cambiar un solo dígito (1000 -> 9000) produjo un hash completamente " +
+        "distinto: no comparten ni un tramo reconocible, aunque el contenido del " +
+        "archivo casi no cambió. Esto es el efecto avalancha del hash: una " +
+        "diferencia mínima en la entrada se traduce en una salida totalmente " +
+        "distinta e impredecible, nunca en un hash \"parecido\".\n\n" +
+        "Esto es lo que permite detectar una violación de integridad: si guardo " +
+        "el hash del archivo cuando confío en su contenido, y más tarde el hash " +
+        "recalculado no coincide, sé que el archivo cambió, sin tener que comparar " +
+        "el contenido byte a byte ni saber qué se modificó.\n\n" +
+        "Pero el hash no sirve para deshacer el cambio. Es una función de una sola " +
+        "vía: a partir del hash no se puede reconstruir el contenido original. El " +
+        "hash me avisa que \"orden.txt\" fue alterado, pero no me devuelve la orden " +
+        "original de 1000 ni me dice qué se modificó. Para eso hace falta otra " +
+        "cosa (un backup, un control de versiones), no el hash.",
+    },
     b2: null,
     b3: null,
     b4: null,
