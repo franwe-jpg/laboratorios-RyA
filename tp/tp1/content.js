@@ -193,7 +193,23 @@ module.exports = {
         "protege contra otros usuarios normales del sistema, no contra quien lo " +
         "administra.",
     },
-    b4: null,
+    b4: {
+      runs: [
+        {
+          command: "cp orden.txt orden.bak\nrm orden.txt\ncp orden.bak orden.txt\ncat orden.txt",
+          output: "Transferir 9000 a la cuenta 55",
+        },
+      ],
+      answer:
+        "El pilar que protege el backup es la disponibilidad: si algo le pasa al " +
+        "archivo original, en cualquier momento se puede restaurar desde la copia " +
+        "y seguir teniendo el dato accesible.\n\n" +
+        "Un backup que nunca se probó restaurar no sirve como control real porque " +
+        "no está garantizado que efectivamente sostenga la disponibilidad: puede " +
+        "estar mal configurado, contener datos corruptos, o fallar el proceso de " +
+        "restauración, y no hay forma de saberlo hasta que se necesita usarlo. Para " +
+        "entonces ya es tarde.",
+    },
   },
 
   // ---- Parte C: del riesgo al control (analysis, owner-authored) ----
