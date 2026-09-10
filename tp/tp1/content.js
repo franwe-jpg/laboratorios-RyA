@@ -214,7 +214,35 @@ module.exports = {
 
   // ---- Parte C: del riesgo al control (analysis, owner-authored) ----
   parteC: {
-    controls: null,      // [{ control, type, pillar, rationale }]
-    justification: null, // string
+    controls: [
+      {
+        control: "Cifrar las copias locales de bases de datos (o el disco completo)",
+        type: "Preventivo",
+        pillar: "Confidencialidad",
+        rationale:
+          "Ataca directamente la vulnerabilidad identificada (copias sin cifrar en " +
+          "disco): si roban el equipo, el contenido queda ilegible sin la " +
+          "passphrase, tal como se demostró en el ejercicio B.2.",
+      },
+      {
+        control: "Registro de auditoría sobre accesos al archivo",
+        type: "Detectivo",
+        pillar: "Confidencialidad",
+        rationale:
+          "No evita el acceso no autorizado, pero permite detectar quién abrió o " +
+          "leyó el archivo, lo que da alerta temprana ante un acceso indebido.",
+      },
+    ],
+    justification:
+      "Si solo pudiera aplicar un control, elegiría el cifrado: ataca directamente " +
+      "la vulnerabilidad identificada en A.3 y reduce el riesgo de confidencialidad " +
+      "a prácticamente cero, sin importar si el equipo termina en manos de un " +
+      "tercero. El costo real no es \"perder la posibilidad de recuperar el " +
+      "dato\" -- eso sería el costo de no tener backup -- sino depender de la " +
+      "passphrase: si la olvido o la pierdo, soy yo quien se queda sin poder abrir " +
+      "mis propias copias, es decir, el riesgo de confidencialidad se traslada a un " +
+      "riesgo de disponibilidad. Aun así, es un costo manejable (una passphrase " +
+      "guardada con cuidado) frente al daño irreversible de una filtración de " +
+      "datos sensibles.",
   },
 };

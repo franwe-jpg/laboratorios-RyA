@@ -53,8 +53,8 @@ const table = (headers, rows, ratios) => {
     columnWidths: widths,
     width: { size: PAGE_W, type: WidthType.DXA },
     rows: [
-      new TableRow({ tableHeader: true, children: headers.map((x, i) => cell(x, true, "E8E8E8", i)) }),
-      ...rows.map((r) => new TableRow({ children: r.map((x, i) => cell(x, false, null, i)) })),
+      new TableRow({ tableHeader: true, cantSplit: true, children: headers.map((x, i) => cell(x, true, "E8E8E8", i)) }),
+      ...rows.map((r) => new TableRow({ cantSplit: true, children: r.map((x, i) => cell(x, false, null, i)) })),
     ],
   });
 };
@@ -129,7 +129,7 @@ body.push(h("Parte C — Del riesgo al control", HeadingLevel.HEADING_1));
 if (content.parteC.controls) {
   body.push(table(["Control", "Tipo", "Pilar CIA", "Fundamento"],
     content.parteC.controls.map((c) => [c.control, c.type, c.pillar, c.rationale]),
-    [28, 16, 14, 42]));
+    [26, 14, 18, 42]));
 } else body.push(pending("tabla de dos controles propuestos"));
 if (content.parteC.justification) {
   body.push(new Paragraph({ spacing: { before: 160 } }));
