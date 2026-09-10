@@ -32,7 +32,18 @@ module.exports = {
         "contraseña. Una contraseña SSH protege el acceso remoto por red, no el " +
         "acceso físico al hardware.",
     },
-    controls: null,      // [{ control, type }]  (10 items, disuasivo/preventivo/detectivo/correctivo/compensatorio)
+    controls: [
+      { control: "Puerta de entrada al edificio", type: "Preventivo" },
+      { control: "Puerta de acceso al piso de aulas", type: "Preventivo" },
+      { control: "Recepcionista controlando ingresos y egresos", type: "Compensatorio" },
+      { control: "Gabinete cerrado con llave para el servidor", type: "Preventivo" },
+      { control: "Cámaras de seguridad (CCTV)", type: "Detectivo" },
+      { control: "Extintor de incendios", type: "Correctivo" },
+      { control: "Cartel de \"zona vigilada por cámaras\"", type: "Disuasivo" },
+      { control: "Luces exteriores del edificio encendidas de noche", type: "Disuasivo" },
+      { control: "Señalización y salida de emergencia", type: "Correctivo" },
+      { control: "Detector de humo en el pasillo", type: "Detectivo" },
+    ],
     threats: null,       // { physicalAccess, naturalDisaster, environmental }
     findings: null,      // [{ finding, note }]  (3 items; photos/sketches handled separately)
   },
