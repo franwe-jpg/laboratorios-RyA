@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="420" viewBox="0 0 640 420">
+  <rect width="640" height="420" fill="#ffffff"/>
+  <text x="320" y="30" font-family="Arial" font-size="18" font-weight="bold" text-anchor="middle" fill="#222">Croquis — Hallazgo 2: tomacorriente sobrecargado</text>
+
+  <rect x="40" y="60" width="560" height="320" fill="#f5f5f5" stroke="#999" stroke-width="2"/>
+
+  <!-- wall outlet -->
+  <rect x="80" y="200" width="50" height="70" rx="6" fill="#e8e8e8" stroke="#333" stroke-width="2"/>
+  <circle cx="97" cy="225" r="4" fill="#333"/>
+  <circle cx="113" cy="225" r="4" fill="#333"/>
+  <circle cx="105" cy="245" r="4" fill="#333"/>
+  <text x="105" y="290" font-family="Arial" font-size="12" text-anchor="middle" fill="#333">Toma de pared</text>
+
+  <!-- chain of power strips -->
+  <g>
+    <rect x="150" y="215" width="120" height="40" rx="6" fill="#cdd6e0" stroke="#333" stroke-width="2"/>
+    <circle cx="170" cy="235" r="4" fill="#333"/><circle cx="195" cy="235" r="4" fill="#333"/>
+    <circle cx="220" cy="235" r="4" fill="#333"/><circle cx="245" cy="235" r="4" fill="#333"/>
+    <line x1="130" y1="235" x2="150" y2="235" stroke="#333" stroke-width="3"/>
+
+    <rect x="290" y="215" width="120" height="40" rx="6" fill="#cdd6e0" stroke="#333" stroke-width="2"/>
+    <circle cx="310" cy="235" r="4" fill="#333"/><circle cx="335" cy="235" r="4" fill="#333"/>
+    <circle cx="360" cy="235" r="4" fill="#333"/><circle cx="385" cy="235" r="4" fill="#333"/>
+    <path d="M270 235 C 280 235, 280 235, 290 235" stroke="#333" stroke-width="3" fill="none"/>
+
+    <rect x="430" y="215" width="120" height="40" rx="6" fill="#cdd6e0" stroke="#333" stroke-width="2"/>
+    <circle cx="450" cy="235" r="4" fill="#333"/><circle cx="475" cy="235" r="4" fill="#333"/>
+    <circle cx="500" cy="235" r="4" fill="#333"/><circle cx="525" cy="235" r="4" fill="#333"/>
+    <path d="M410 235 C 420 235, 420 235, 430 235" stroke="#333" stroke-width="3" fill="none"/>
+  </g>
+  <text x="350" y="285" font-family="Arial" font-size="12" text-anchor="middle" fill="#333">Tres zapatillas encadenadas entre sí</text>
+
+  <!-- warning triangle -->
+  <polygon points="560,120 590,175 530,175" fill="#fff6db" stroke="#e0a800" stroke-width="2"/>
+  <text x="560" y="165" font-family="Arial" font-size="26" text-anchor="middle" fill="#e0a800" font-weight="bold">!</text>
+
+  <text x="320" y="405" font-family="Arial" font-size="13" text-anchor="middle" fill="#555">Múltiples zapatillas en cadena sobre una sola toma: riesgo de sobrecarga y de incendio eléctrico.</text>
+</svg>

@@ -59,7 +59,34 @@ module.exports = {
         "restablecerse el suministro sin protección adecuada (UPS o supresor de " +
         "picos), daña la fuente de alimentación del servidor.",
     },
-    findings: null,      // [{ finding, note }]  (3 items; photos/sketches handled separately)
+    findings: [
+      {
+        finding: "El gabinete del servidor no se cierra con llave",
+        image: "assets/hallazgo1.png",
+        note:
+          "La compuerta del gabinete permanece habitualmente abierta y no se usa " +
+          "ningún candado. Esto anula por completo la capa de \"rack\" del " +
+          "relevamiento de A.1: cualquiera que llegue hasta ahí tiene acceso " +
+          "directo al servidor.",
+      },
+      {
+        finding: "Tomacorriente sobrecargado con zapatillas encadenadas",
+        image: "assets/hallazgo2.png",
+        note:
+          "Varias zapatillas conectadas en cadena sobre una única toma de pared. " +
+          "Es una amenaza autoinfligida de la familia \"alteraciones del " +
+          "entorno\": aumenta el riesgo de sobrecarga y de incendio eléctrico, " +
+          "sin que medie ningún factor externo.",
+      },
+      {
+        finding: "El puesto de control queda sin supervisión",
+        image: "assets/hallazgo3.png",
+        note:
+          "Cuando el recepcionista se ausenta, no hay ningún control de acceso " +
+          "activo en su lugar ni forma de registrar quién entró o salió durante " +
+          "esa ventana de tiempo.",
+      },
+    ],
   },
 
   // ---- Parte B: laboratorio (executed evidence) ----

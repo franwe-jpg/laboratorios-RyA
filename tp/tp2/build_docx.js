@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const {
   Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType,
-  Table, TableRow, TableCell, WidthType, ShadingType,
+  Table, TableRow, TableCell, WidthType, ShadingType, ImageRun,
 } = require("docx");
 
 const content = require("./content.js");
@@ -109,8 +109,14 @@ if (content.parteA.threats) {
 body.push(h("A.4 — Tres hallazgos de mayor riesgo", HeadingLevel.HEADING_2));
 if (content.parteA.findings) {
   content.parteA.findings.forEach((f, i) => {
-    body.push(new Paragraph({ spacing: { before: 80 },
+    body.push(new Paragraph({ spacing: { before: 160 },
       children: [new TextRun({ text: `${i + 1}. ${f.finding}`, bold: true })] }));
+    if (f.image) {
+      const imgPath = path.join(__dirname, f.image);
+      const imgBuf = fs.readFileSync(imgPath);
+      body.push(new Paragraph({ spacing: { before: 80, after: 80 }, alignment: AlignmentType.CENTER,
+        children: [new ImageRun({ type: "png", data: imgBuf, transformation: { width: 440, height: 289 } })] }));
+    }
     body.push(p(f.note));
   });
 } else body.push(pending("tres hallazgos con foto o croquis"));
