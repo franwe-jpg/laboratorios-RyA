@@ -13,7 +13,25 @@ module.exports = {
 
   // ---- Parte A: relevamiento de un entorno (analysis, owner-authored) ----
   parteA: {
-    layers: null,        // { description, missingLayer }
+    layers: {
+      description:
+        "Entorno: el DIT (edificio de Informática de la universidad) donde se " +
+        "cursan las clases.\n\n" +
+        "Perímetro: puerta de entrada al edificio.\n" +
+        "Edificio: escalera y puerta de acceso al piso de aulas.\n" +
+        "Sala: un recepcionista (persona administrativa) que supervisa y " +
+        "controla quién entra y quién sale.\n" +
+        "Rack: junto al recepcionista, el servidor y el equipo de red están " +
+        "dentro de un gabinete cerrado con llave.",
+      missingLayer:
+        "Equipo. El servidor solo tiene protección lógica (contraseña de acceso " +
+        "por SSH), pero ningún control físico propio. Si alguien ya está frente " +
+        "al equipo -- el gabinete quedó abierto, fue forzado, o alguien con la " +
+        "llave actúa de mala fe -- no hay nada que lo frene: puede extraer el " +
+        "disco, bootear desde un USB o clonarlo, sin necesitar ninguna " +
+        "contraseña. Una contraseña SSH protege el acceso remoto por red, no el " +
+        "acceso físico al hardware.",
+    },
     controls: null,      // [{ control, type }]  (10 items, disuasivo/preventivo/detectivo/correctivo/compensatorio)
     threats: null,       // { physicalAccess, naturalDisaster, environmental }
     findings: null,      // [{ finding, note }]  (3 items; photos/sketches handled separately)
