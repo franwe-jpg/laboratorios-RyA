@@ -91,7 +91,91 @@ module.exports = {
 
   // ---- Parte B: laboratorio (executed evidence) ----
   parteB: {
-    b1: null,  // LUKS: { intro, runs: [{caption, command, output}], answer }
+    b1: {
+      intro:
+        "El contenedor arys-lab:bookworm no tiene privilegios para manipular " +
+        "loop devices ni dispositivos de mapeo por defecto. Se ejecutó con: " +
+        "--cap-add=SYS_ADMIN --device /dev/loop-control --device /dev/loop42 " +
+        "--device /dev/mapper/control --device-cgroup-rule=\"b <major " +
+        "device-mapper>:* rmw\" --security-opt apparmor=unconfined (ver README " +
+        "de docker/ para el detalle de cada flag). luksOpen usó --disable-keyring " +
+        "porque el keyring del kernel no está disponible dentro del contenedor.",
+      runs: [
+        {
+          caption: "Creación del archivo-disco y del dispositivo de loop",
+          command:
+            "dd if=/dev/zero of=disco_lab.img bs=1M count=2048\n" +
+            "losetup /dev/loop42 disco_lab.img",
+          output:
+            "2048+0 records in\n2048+0 records out\n" +
+            "2147483648 bytes (2.1 GB, 2.0 GiB) copied, 1.49 s, 1.4 GB/s",
+        },
+        {
+          caption: "Cifrado (luksFormat) y apertura (luksOpen)",
+          command:
+            "cryptsetup luksFormat /dev/loop42\n" +
+            "cryptsetup luksOpen --disable-keyring /dev/loop42 caja_fuerte",
+          output:
+            "WARNING!\n========\n" +
+            "This will overwrite data on /dev/loop42 irrevocably.\n\n" +
+            "Are you sure? (Type 'yes' in capital letters): YES\n" +
+            "Enter passphrase for /lab/disco_lab.img: \n" +
+            "Verify passphrase: \n" +
+            "Enter passphrase for /lab/disco_lab.img: ",
+        },
+        {
+          caption: "Formateo, montaje y prueba de escritura/lectura",
+          command:
+            "mkfs.ext4 /dev/mapper/caja_fuerte\n" +
+            "mkdir -p /mnt/caja && mount /dev/mapper/caja_fuerte /mnt/caja\n" +
+            "echo \"secreto de laboratorio\" > /mnt/caja/secreto.txt\n" +
+            "cat /mnt/caja/secreto.txt",
+          output:
+            "mke2fs 1.47.0 (5-Feb-2023)\n" +
+            "Creating filesystem with 520192 4k blocks and 130048 inodes\n" +
+            "Filesystem UUID: 6f085a99-5da9-402d-9320-6f4329fa9294\n" +
+            "[... salida de mke2fs omitida ...]\n\n" +
+            "secreto de laboratorio",
+        },
+        {
+          caption: "Inspección del header LUKS (luksDump)",
+          command: "cryptsetup luksDump /dev/loop42",
+          output:
+            "LUKS header information\n" +
+            "Version:        2\n" +
+            "UUID:           1704997b-ccdf-4145-b356-1bebac59fb0b\n\n" +
+            "Data segments:\n  0: crypt\n" +
+            "        cipher: aes-xts-plain64\n" +
+            "        sector: 512 [bytes]\n\n" +
+            "Keyslots:\n  0: luks2\n" +
+            "        Key:        512 bits\n" +
+            "        Cipher:     aes-xts-plain64\n" +
+            "        PBKDF:      argon2id",
+        },
+        {
+          caption: "Cierre y prueba de inaccesibilidad sin la passphrase",
+          command:
+            "umount /mnt/caja\n" +
+            "cryptsetup luksClose caja_fuerte\n" +
+            "mount /dev/loop42 /mnt/caja",
+          output:
+            "mount: /mnt/caja: unknown filesystem type 'crypto_LUKS'.",
+        },
+      ],
+      answer:
+        "El cifrado de disco completo (LUKS) neutraliza el ataque de robo de " +
+        "medio apagado: si roban la notebook o el disco apagados, o se extrae el " +
+        "disco físicamente para leerlo en otra máquina, el contenido es " +
+        "indistinguible de ruido -- el sistema ni siquiera reconoce el tipo de " +
+        "sistema de archivos, como se ve en el último comando (\"unknown " +
+        "filesystem type 'crypto_LUKS'\").\n\n" +
+        "Lo que NO neutraliza es un ataque contra el equipo encendido y " +
+        "desbloqueado: mientras la sesión está abierta (después de luksOpen y " +
+        "montado), el sistema operativo ve el contenido en texto plano como " +
+        "cualquier archivo normal, tal como se demostró al leer secreto.txt en " +
+        "el paso anterior. Un atacante con acceso a la sesión activa, o que la " +
+        "roba en caliente, no encuentra ninguna barrera del cifrado de disco.",
+    },
     b2: null,  // USBGuard
     b3: null,  // UPS / theoretical
   },
