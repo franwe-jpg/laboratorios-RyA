@@ -176,7 +176,35 @@ module.exports = {
         "el paso anterior. Un atacante con acceso a la sesión activa, o que la " +
         "roba en caliente, no encuentra ninguna barrera del cifrado de disco.",
     },
-    b2: null,  // USBGuard
+    b2: {
+      intro:
+        "USBGuard no es reproducible dentro de un contenedor Docker por dos " +
+        "razones estructurales: necesita hardware USB real enumerado por el " +
+        "host (un contenedor no tiene bus USB propio), y corre como servicio " +
+        "systemd (systemctl enable --now usbguard), mientras que la imagen no " +
+        "tiene ningún sistema de init -- el PID 1 dentro del contenedor es la " +
+        "propia shell. El enunciado del TP ya prevé esta limitación al pedir " +
+        "explícitamente trabajar en una máquina virtual descartable para la " +
+        "Parte B. Este ejercicio no se ejecutó; se documenta como limitación " +
+        "conocida.",
+      runs: [],
+      answer:
+        "Una lista negra bloquea dispositivos por firma o tipo conocido de " +
+        "hardware malicioso. El problema con BadUSB / Rubber Ducky es que el " +
+        "dispositivo falsifica su identidad: se presenta ante el sistema " +
+        "operativo como un teclado genérico y confiable, con el mismo tipo de " +
+        "identificador que cualquier teclado inocente. No hay ninguna firma " +
+        "distinta que una lista negra pueda bloquear, porque el dispositivo " +
+        "parece exactamente igual a uno legítimo.\n\n" +
+        "Una lista blanca (política default-deny de USBGuard) no depende de " +
+        "reconocer qué es malicioso: solo permite los dispositivos puntuales ya " +
+        "autorizados de antemano. Un BadUSB nuevo, por más que finja ser un " +
+        "teclado normal, no es ninguno de los ya permitidos, y queda bloqueado " +
+        "sin que el sistema necesite identificarlo como una amenaza.\n\n" +
+        "El costo de este enfoque es la comodidad: cada dispositivo nuevo " +
+        "requiere autorización manual. Es intencional -- el default-deny " +
+        "cambia comodidad por seguridad a propósito.",
+    },
     b3: null,  // UPS / theoretical
   },
 
