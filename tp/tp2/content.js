@@ -44,7 +44,21 @@ module.exports = {
       { control: "Señalización y salida de emergencia", type: "Correctivo" },
       { control: "Detector de humo en el pasillo", type: "Detectivo" },
     ],
-    threats: null,       // { physicalAccess, naturalDisaster, environmental }
+    threats: {
+      physicalAccess:
+        "Alguien ajeno a la institución ingresa al gabinete del servidor -- " +
+        "llave sustraída, gabinete forzado, o aprovechando un horario de bajo " +
+        "control (de noche o fin de semana) -- y sustrae el equipo o algún " +
+        "componente (disco, memoria).",
+      naturalDisaster:
+        "Una tormenta con lluvia intensa, asociada a viento patagónico, provoca " +
+        "una filtración de agua por el techo o una ventana cercana a la sala del " +
+        "servidor, dañando el equipamiento por contacto con humedad.",
+      environmental:
+        "Un corte de energía eléctrica, seguido de un pico de tensión al " +
+        "restablecerse el suministro sin protección adecuada (UPS o supresor de " +
+        "picos), daña la fuente de alimentación del servidor.",
+    },
     findings: null,      // [{ finding, note }]  (3 items; photos/sketches handled separately)
   },
 
