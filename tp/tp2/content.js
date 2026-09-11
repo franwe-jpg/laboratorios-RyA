@@ -273,7 +273,31 @@ module.exports = {
         priority: "Media",
       },
     ],
-    frameworkNote: null, // string: ISO 27001 Anexo A / NIST 800-53 mapping
-    conclusion: null,    // string
+    frameworkNote:
+      "Cámaras + sensor de movimiento (hallazgo 3): ISO 27001 Anexo A 7.4 " +
+      "(Monitoreo de seguridad física) -- NIST 800-53 PE-6 (Monitoring Physical " +
+      "Access).\n\n" +
+      "Candado en el gabinete + cifrado de disco (hallazgo 1): ISO 27001 Anexo " +
+      "A 7.1 (Perímetros de seguridad física) y 7.9 (Seguridad de activos fuera " +
+      "de las instalaciones, en lo referido al cifrado como control sobre el " +
+      "dispositivo) -- NIST 800-53 PE-3 (Physical Access Control).\n\n" +
+      "Supresor de picos (hallazgo 2): ISO 27001 Anexo A 7.11 (Servicios " +
+      "públicos de soporte: energía, climatización) -- NIST 800-53 PE-9 (Power " +
+      "Equipment and Cabling).",
+    conclusion:
+      "Si solo hubiera presupuesto para un control, elegiría cámaras de " +
+      "seguridad + sensor de movimiento (hallazgo 3), a pesar de ser el más " +
+      "caro de los tres frente al candado casi gratuito del hallazgo 1.\n\n" +
+      "La razón es el efecto en cadena entre hallazgos que surge del propio " +
+      "relevamiento de A.1: el recepcionista es el único control de acceso " +
+      "identificado para todo el piso. Cuando se ausenta, esa vigilancia " +
+      "desaparece por completo -- y con ella, la única protección real que " +
+      "hoy tiene el gabinete del servidor, más allá de que además le falte " +
+      "candado. Instalar cámaras y sensor de movimiento no solo cierra el " +
+      "hallazgo 3 (el puesto sin supervisión): cubre también, de forma " +
+      "indirecta, buena parte del riesgo del hallazgo 1, porque un sensor en " +
+      "la zona del gabinete detecta el acceso no autorizado exista o no exista " +
+      "candado. Un solo control reduciendo dos riesgos a la vez justifica el " +
+      "costo mayor frente a resolver un único hallazgo con el candado.",
   },
 };

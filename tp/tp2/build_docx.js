@@ -157,11 +157,15 @@ if (content.parteC.riskTable) {
 } else body.push(pending("tabla de tratamiento del riesgo, ordenada por riesgo"));
 
 body.push(h("Trazabilidad normativa", HeadingLevel.HEADING_2));
-if (content.parteC.frameworkNote) body.push(p(content.parteC.frameworkNote));
+if (content.parteC.frameworkNote) {
+  for (const para of content.parteC.frameworkNote.split("\n\n")) body.push(p(para));
+}
 else body.push(pending("mapeo a ISO 27001 Anexo A cláusula 7 / NIST 800-53 PE"));
 
 body.push(h("Conclusión", HeadingLevel.HEADING_2));
-if (content.parteC.conclusion) body.push(p(content.parteC.conclusion));
+if (content.parteC.conclusion) {
+  for (const para of content.parteC.conclusion.split("\n\n")) body.push(p(para));
+}
 else body.push(pending("párrafo de conclusión: un solo control, cuál y por qué"));
 
 const doc = new Document({
