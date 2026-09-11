@@ -40,20 +40,6 @@ estructura:
 | `assets/`        | Imágenes/croquis embebidos en el documento (si el TP lo requiere). |
 | `work/`          | Carpeta de trabajo del laboratorio (montada dentro del contenedor Docker); no forma parte del entregable. |
 
-Para modificar un TP se edita `content.js` y se regenera el `.docx`:
-
-```bash
-cd tp/tp1        # o tp/tp2
-node build_docx.js
-```
-
-(la primera vez hace falta `npm install docx` dentro de esa carpeta).
-
-Para obtener el PDF final a entregar:
-
-```bash
-soffice --headless --convert-to pdf TP1.docx
-```
 
 ### Cómo se hizo la parte de laboratorio
 
