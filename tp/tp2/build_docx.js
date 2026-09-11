@@ -76,8 +76,15 @@ body.push(new Paragraph({ spacing: { before: 1200, after: 240 }, alignment: Alig
     children: [new TextRun({ text: t, size: 24 })] })));
 body.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 480 },
   children: [new TextRun({ text: content.meta.student, size: 24, bold: true })] }));
-body.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 480 },
+body.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 40 },
   children: [new TextRun({ text: content.meta.date, size: 22 })] }));
+body.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 480 },
+  children: [new TextRun({
+    text: "El desarrollo de este trabajo fue asistido por la IA Claude (Anthropic). " +
+          "Se optó por crear un contenedor Docker para facilitar la reproducibilidad " +
+          "de los ejercicios de laboratorio.",
+    italics: true, size: 18, color: "555555",
+  })] }));
 
 // ---- Parte A
 body.push(h("Parte A — Relevamiento de un entorno", HeadingLevel.HEADING_1));
