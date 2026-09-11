@@ -153,7 +153,7 @@ if (content.parteC.riskTable) {
     ["Hallazgo", "Amenaza", "Impacto", "Prob.", "Control propuesto", "Tipo", "Prioridad"],
     content.parteC.riskTable.map((r) =>
       [r.finding, r.threat, r.impact, r.likelihood, r.control, r.type, r.priority]),
-    [20, 16, 8, 8, 22, 12, 14]));
+    [18, 13, 10, 9, 21, 15, 14]));
 } else body.push(pending("tabla de tratamiento del riesgo, ordenada por riesgo"));
 
 body.push(h("Trazabilidad normativa", HeadingLevel.HEADING_2));

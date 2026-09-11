@@ -37,7 +37,7 @@ module.exports = {
       { control: "Puerta de acceso al piso de aulas", type: "Preventivo" },
       { control: "Recepcionista controlando ingresos y egresos", type: "Compensatorio" },
       { control: "Gabinete cerrado con llave para el servidor", type: "Preventivo" },
-      { control: "Cámaras de seguridad (CCTV)", type: "Detectivo" },
+      { control: "Sistema de alarma sonora contra incendios", type: "Detectivo" },
       { control: "Extintor de incendios", type: "Correctivo" },
       { control: "Cartel de \"zona vigilada por cámaras\"", type: "Disuasivo" },
       { control: "Luces exteriores del edificio encendidas de noche", type: "Disuasivo" },
@@ -75,8 +75,9 @@ module.exports = {
         note:
           "Varias zapatillas conectadas en cadena sobre una única toma de pared. " +
           "Es una amenaza autoinfligida de la familia \"alteraciones del " +
-          "entorno\": aumenta el riesgo de sobrecarga y de incendio eléctrico, " +
-          "sin que medie ningún factor externo.",
+          "entorno\": aumenta el riesgo de sobrecarga, con posibilidad de corte " +
+          "de energía o daño a los componentes conectados, sin que medie ningún " +
+          "factor externo.",
       },
       {
         finding: "El puesto de control queda sin supervisión",
@@ -243,7 +244,35 @@ module.exports = {
 
   // ---- Parte C: plan de mejora priorizado (analysis, owner-authored) ----
   parteC: {
-    riskTable: null,     // [{ finding, threat, impact, likelihood, control, type, priority }]
+    riskTable: [
+      {
+        finding: "Puesto de control queda sin supervisión",
+        threat: "Ingreso o merodeo sin ningún registro",
+        impact: "Alto",
+        likelihood: "Baja",
+        control: "Cámaras de seguridad + sensor de movimiento en la zona del gabinete",
+        type: "Detectivo",
+        priority: "Alta",
+      },
+      {
+        finding: "Gabinete del servidor sin llave",
+        threat: "Robo o manipulación física del servidor",
+        impact: "Alto",
+        likelihood: "Baja",
+        control: "Candado en el gabinete + cifrado de disco (LUKS)",
+        type: "Preventivo",
+        priority: "Alta",
+      },
+      {
+        finding: "Tomacorriente sobrecargado (zapatillas encadenadas)",
+        threat: "Corte de energía o daño a componentes conectados",
+        impact: "Medio",
+        likelihood: "Baja",
+        control: "Reemplazar por una única zapatilla con supresor de picos",
+        type: "Preventivo",
+        priority: "Media",
+      },
+    ],
     frameworkNote: null, // string: ISO 27001 Anexo A / NIST 800-53 mapping
     conclusion: null,    // string
   },
