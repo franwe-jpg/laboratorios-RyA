@@ -205,7 +205,40 @@ module.exports = {
         "requiere autorización manual. Es intencional -- el default-deny " +
         "cambia comodidad por seguridad a propósito.",
     },
-    b3: null,  // UPS / theoretical
+    b3: {
+      intro:
+        "No se dispone de un UPS con Network UPS Tools para ejecutar upsc; se " +
+        "responde de forma teórica, tal como permite el propio enunciado.",
+      runs: [],
+      answer:
+        "Configuración de energía (RTO 1 hora): UPS más grupo electrógeno. El " +
+        "UPS cubre el corte inicial -- los segundos o pocos minutos hasta que el " +
+        "grupo electrógeno arranca y toma la carga -- y el grupo electrógeno " +
+        "sostiene el servicio de forma indefinida mientras tenga combustible. " +
+        "Con esta combinación el servicio prácticamente no llega a caerse, así " +
+        "que el RTO de 1 hora nunca se pone a prueba: no hay ventana de " +
+        "inactividad que recuperar.\n\n" +
+        "Estrategia de backup (RPO 15 minutos): el RPO no depende de si hay " +
+        "conexión a internet, depende de cada cuánto se respalda el dato -- es " +
+        "el tiempo máximo de datos que se puede perder, contado desde el último " +
+        "backup válido. Para no superar los 15 minutos, se define una " +
+        "frecuencia de respaldo de 10 minutos, con margen.\n\n" +
+        "Aplicando 3-2-1-1-0 a esa frecuencia:\n\n" +
+        "- 3 copias: el servidor en producción, una réplica en la nube y una " +
+        "copia en un disco SSD externo.\n\n" +
+        "- 2 medios distintos: almacenamiento en disco físico y almacenamiento " +
+        "en la nube.\n\n" +
+        "- 1 copia offsite: la réplica en la nube, alojada en un servidor " +
+        "geográficamente separado (en otro país), para que un desastre físico " +
+        "local no afecte ambas copias a la vez.\n\n" +
+        "- 1 copia offline: el SSD externo, desconectado de la red entre " +
+        "backups. Si un ransomware cifra el servidor y la réplica en la nube, " +
+        "el SSD desconectado en ese momento queda intacto por no haber estado " +
+        "expuesto al ataque.\n\n" +
+        "- 0 errores: las copias se prueban restaurando periódicamente, no solo " +
+        "se generan (la misma lección de TP1 B.4: un backup nunca restaurado no " +
+        "es un control real).",
+    },
   },
 
   // ---- Parte C: plan de mejora priorizado (analysis, owner-authored) ----
