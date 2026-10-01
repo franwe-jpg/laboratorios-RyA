@@ -2,7 +2,9 @@
 
 Repositorio de prácticas para la materia *Auditoría y Seguridad de Sistemas*
 (ARyS · IF046 · UNPSJB Trelew). El material oficial de la cátedra (PDFs)
-vive en `docs/`; los trabajos prácticos resueltos viven en `tp/`.
+vive en `docs/`. **Todo lo resuelto en la materia vive en `tp/`** (en este
+workspace, `practica/laboratorios/tp/`): ahí está cada trabajo práctico con
+su fuente, su documento y su evidencia.
 
 ## Estructura
 
@@ -10,7 +12,7 @@ vive en `docs/`; los trabajos prácticos resueltos viven en `tp/`.
 | ------------- | ------------------------------------------------------------------ |
 | `docs/`       | Material de cátedra: PDFs y material de estudio derivado en Markdown. |
 | `tp/`         | Trabajos prácticos resueltos (ver más abajo).                      |
-| `docker/`     | Contenedor reproducible usado para la parte de laboratorio de los TP. |
+| `docker/`     | Contenedor reproducible para la parte de laboratorio de **TP1 y TP2** (TP3 se reproduce en VM, ver abajo). |
 | `scripts/`    | Checker de integridad de `docs/` (manifiesto SHA-256).             |
 | `AGENTS.md`   | Reglas para agentes de IA que trabajen en este repositorio.         |
 
@@ -29,8 +31,8 @@ ante archivos nuevos sin admitir. Ver `AGENTS.md` para el detalle de uso.
 
 ## Trabajos prácticos (`tp/`)
 
-Cada TP vive en su propia carpeta (`tp/tp1/`, `tp/tp2/`) con la misma
-estructura:
+Todo el trabajo resuelto está acá, en `tp/`. Cada TP vive en su propia carpeta
+(`tp/tp1/`, `tp/tp2/`, `tp/tp3/`) con la misma estructura:
 
 | Archivo | Qué es |
 | ------- | ------ |
@@ -41,16 +43,19 @@ estructura:
 | `work/`          | Carpeta de trabajo del laboratorio (montada dentro del contenedor Docker); no forma parte del entregable. |
 
 
-### Cómo se hizo la parte de laboratorio
+### Cómo se reproduce la parte de laboratorio
 
-Los ejercicios prácticos de cada TP (hashes, GPG, permisos, LUKS, etc.) se
-ejecutaron dentro de un contenedor Docker (`docker/Dockerfile`), para que el
-entorno sea reproducible: mismas versiones de herramientas, sin tocar el
-sistema anfitrión. Ver `docker/README.md` para el detalle completo,
-incluyendo las limitaciones conocidas (USBGuard no es reproducible en un
-contenedor) y los flags de privilegios necesarios para LUKS.
+El entorno de laboratorio **no es el mismo para todos los TP**. Hay dos modelos,
+según lo que cada práctica necesita:
 
-Para levantar el entorno:
+#### TP1 y TP2 — contenedor Docker
+
+Los ejercicios de TP1 y TP2 (hashes, GPG, permisos, LUKS, etc.) se ejecutaron
+dentro de un contenedor Docker (`docker/Dockerfile`), para que el entorno sea
+reproducible: mismas versiones de herramientas, sin tocar el sistema anfitrión.
+Ver `docker/README.md` para el detalle completo, incluyendo las limitaciones
+conocidas (USBGuard no es reproducible en un contenedor) y los flags de
+privilegios necesarios para LUKS.
 
 ```bash
 docker build -f docker/Dockerfile -t arys-lab:bookworm .
@@ -60,3 +65,15 @@ docker run --rm -it -v "$PWD/tp/tp1/work:/lab" arys-lab:bookworm
 
 Los TP1 B.1–B.4 corren con ese comando simple. El TP2 B.1 (LUKS) necesita
 privilegios adicionales — el comando exacto está en `docker/README.md`.
+
+#### TP3 — laboratorio VirtualBox (no Docker)
+
+TP3 (Reconocimiento y Escaneo) **no se reproduce con el contenedor**: un escaneo
+y explotación de red necesita máquinas virtuales reales con sus interfaces de
+red. El laboratorio es **Kali Linux (atacante) + Metasploitable 2 (blanco)**
+sobre una red solo-anfitrión aislada en VirtualBox.
+
+La receta completa de armado (diseño de red, direcciones, verificaciones) está
+documentada **dentro del propio entregable**, en `tp/tp3/TP3.docx` (Parte A).
+Por eso el `docker/Dockerfile` declara explícitamente que TP3 queda fuera de su
+alcance.
