@@ -12,7 +12,7 @@ su fuente, su documento y su evidencia.
 | ------------- | ------------------------------------------------------------------ |
 | `docs/`       | Material de cátedra: PDFs y material de estudio derivado en Markdown. |
 | `tp/`         | Trabajos prácticos resueltos (ver más abajo).                      |
-| `docker/`     | Contenedor reproducible para la parte de laboratorio de **TP1 y TP2** (TP3 se reproduce en VM, ver abajo). |
+| `docker/`     | Contenedor reproducible para la parte de laboratorio de **TP1 y TP2** (TP3 y TP4 se reproducen en VM, ver abajo). |
 | `scripts/`    | Checker de integridad de `docs/` (manifiesto SHA-256).             |
 | `AGENTS.md`   | Reglas para agentes de IA que trabajen en este repositorio.         |
 
@@ -32,7 +32,7 @@ ante archivos nuevos sin admitir. Ver `AGENTS.md` para el detalle de uso.
 ## Trabajos prácticos (`tp/`)
 
 Todo el trabajo resuelto está acá, en `tp/`. Cada TP vive en su propia carpeta
-(`tp/tp1/`, `tp/tp2/`, `tp/tp3/`) con la misma estructura:
+(`tp/tp1/`, `tp/tp2/`, `tp/tp3/`, `tp/tp4/`) con la misma estructura:
 
 | Archivo | Qué es |
 | ------- | ------ |
@@ -66,14 +66,22 @@ docker run --rm -it -v "$PWD/tp/tp1/work:/lab" arys-lab:bookworm
 Los TP1 B.1–B.4 corren con ese comando simple. El TP2 B.1 (LUKS) necesita
 privilegios adicionales — el comando exacto está en `docker/README.md`.
 
-#### TP3 — laboratorio VirtualBox (no Docker)
+#### TP3 y TP4 — laboratorio VirtualBox (no Docker)
 
-TP3 (Reconocimiento y Escaneo) **no se reproduce con el contenedor**: un escaneo
-y explotación de red necesita máquinas virtuales reales con sus interfaces de
-red. El laboratorio es **Kali Linux (atacante) + Metasploitable 2 (blanco)**
-sobre una red solo-anfitrión aislada en VirtualBox.
+TP3 (Reconocimiento y Escaneo) y TP4 (Sniffing y Análisis de Tráfico) **no se
+reproducen con el contenedor**: necesitan máquinas virtuales reales con sus
+interfaces de red (escaneo de puertos, ARP spoofing) que un contenedor no
+puede ofrecer de forma fiel.
 
-La receta completa de armado (diseño de red, direcciones, verificaciones) está
-documentada **dentro del propio entregable**, en `tp/tp3/TP3.docx` (Parte A).
-Por eso el `docker/Dockerfile` declara explícitamente que TP3 queda fuera de su
+- **TP3**: Kali Linux (atacante) + Metasploitable 2 (blanco) sobre una red
+  solo-anfitrión aislada.
+- **TP4**: dos VMs Kali Linux (atacante y víctima, esta última clonada de la
+  primera) sobre una **NAT Network** de VirtualBox — un segmento L2 compartido
+  entre ambas, con salida a internet para generar tráfico de prueba real
+  (HTTP/HTTPS) sin exponer la red del laboratorio a terceros.
+
+La receta completa de armado de cada laboratorio (diseño de red, direcciones,
+verificaciones) está documentada **dentro del propio entregable**: Parte A de
+`tp/tp3/TP3.docx` y `tp/tp4/TP4.docx` respectivamente. Por eso el
+`docker/Dockerfile` declara explícitamente que TP3 y TP4 quedan fuera de su
 alcance.
