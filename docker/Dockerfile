@@ -1,4 +1,4 @@
-# Reproducible lab environment for ARyS (IF046) TP1 and TP2.
+# Reproducible lab environment for ARyS (IF046) TP1, TP2 and TP6.
 #
 # Scope:
 #   TP1 (B.1-B.4)  hash, symmetric GPG, Unix permissions, backup  -> works unprivileged
@@ -26,6 +26,10 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
       nut-client \
       # Quality of life inside an interactive shell.
       less procps file binutils \
+      # TP6: openssl CLI (enc, s_client, x509), CA bundle so s_client can verify
+      # real chains, and python3-cryptography for the AES-GCM demo (openssl enc
+      # rejects AEAD ciphers).
+      openssl ca-certificates python3-cryptography \
  && rm -rf /var/lib/apt/lists/*
 
 # Unprivileged account for TP1 B.3.
