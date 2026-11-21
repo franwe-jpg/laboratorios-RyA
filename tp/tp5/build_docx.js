@@ -135,7 +135,9 @@ const markdown = (src) => {
       out.push(...codeBlock(code));
     } else if (/^#{1,4} /.test(line)) {
       const level = line.match(/^#+/)[0].length;
-      out.push(new Paragraph({ heading: HEADINGS[level], children: inline(line.replace(/^#+ /, "")) }));
+      const title = line.replace(/^#+ /, "");
+      out.push(...flushShots(), new Paragraph({ heading: HEADINGS[level], children: inline(title) }));
+      currentSection = plain(title);
       i++;
     } else if (line.startsWith("|")) {
       out.push(...table(take((l) => l.startsWith("|"))));
@@ -172,6 +174,31 @@ const image = (b64) => {
     children: [new ImageRun({ type: "png", data, transformation: { width, height: Math.round((h * width) / w) } })] });
 };
 
+// ---------------------------------------------------------------- terminal shots
+// Kali-style captures of the academic commands (shots/capture.py records their
+// literal output, shots/render.py draws them). Each one is appended at the end
+// of the report section whose heading matches its `section`.
+const SHOTS = JSON.parse(fs.readFileSync(path.join(__dirname, "shots", "transcript.json"), "utf8"));
+const plain = (t) => t.replace(/[*`]/g, "").trim();
+let currentSection = null;
+let shotNumber = 0;
+const placed = new Set();
+
+function flushShots() {
+  const out = [];
+  for (const shot of SHOTS.filter((x) => plain(x.section) === currentSection)) {
+    const data = fs.readFileSync(path.join(__dirname, "assets", `${shot.name}.png`));
+    const w = data.readUInt32BE(16), h = data.readUInt32BE(20);
+    shotNumber += 1;
+    placed.add(shot.name);
+    out.push(new Paragraph({ spacing: { before: 160, after: 60 }, keepNext: true,
+      children: [new TextRun({ text: `Captura ${shotNumber} — ${shot.caption}`, bold: true, size: 20 })] }));
+    out.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 160 },
+      children: [new ImageRun({ type: "png", data, transformation: { width: 600, height: Math.round((h * 600) / w) } })] }));
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------- build
 const nb = JSON.parse(fs.readFileSync(NOTEBOOK, "utf8"));
 const meta = nb.metadata.tp5;
@@ -200,6 +227,10 @@ for (const cell of nb.cells) {
     else if (data["text/markdown"]) body.push(...markdown([].concat(data["text/markdown"]).join("")));
   }
 }
+
+body.push(...flushShots());
+const missing = SHOTS.filter((x) => !placed.has(x.name)).map((x) => `${x.name} -> "${x.section}"`);
+if (missing.length) throw new Error(`terminal shots without a matching section: ${missing.join(", ")}`);
 
 const heading = (size) => ({
   run: { font: FONT, size, bold: true, color: "1F1F1F" },

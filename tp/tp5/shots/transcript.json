@@ -1,0 +1,250 @@
+[
+  {
+    "name": "A-sin-firewall",
+    "host": "atacante",
+    "section": "A.1 — Conexión a un puerto no habilitado (8080)",
+    "caption": "Antes del firewall: el 8080 se rechaza al instante (RST)",
+    "steps": [
+      {
+        "command": "nc -zv -w3 10.0.0.10 8080",
+        "output": "nc: connect to 10.0.0.10 port 8080 (tcp) failed: Connection refused"
+      }
+    ]
+  },
+  {
+    "name": "A-reglas",
+    "host": "servidor",
+    "section": "Parte A — Firewall con nftables",
+    "caption": "Aplicación del ruleset de la consigna en el servidor",
+    "steps": [
+      {
+        "command": "nft add table inet filtro",
+        "output": ""
+      },
+      {
+        "command": "nft add chain inet filtro entrada '{ type filter hook input priority 0; policy drop; }'",
+        "output": ""
+      },
+      {
+        "command": "nft add rule inet filtro entrada ct state established,related accept",
+        "output": ""
+      },
+      {
+        "command": "nft add rule inet filtro entrada iif lo accept",
+        "output": ""
+      },
+      {
+        "command": "nft add rule inet filtro entrada tcp dport 22 accept",
+        "output": ""
+      },
+      {
+        "command": "nft list table inet filtro",
+        "output": "table inet filtro {\n\tchain entrada {\n\t\ttype filter hook input priority filter; policy drop;\n\t\tct state established,related accept\n\t\tiif \"lo\" accept\n\t\ttcp dport 22 accept\n\t}\n}"
+      }
+    ]
+  },
+  {
+    "name": "A-con-firewall",
+    "host": "atacante",
+    "section": "A.1 — Conexión a un puerto no habilitado (8080)",
+    "caption": "Con el firewall: 22 permitido; 8080, 8000 e ICMP descartados en silencio",
+    "steps": [
+      {
+        "command": "nc -zv -w3 10.0.0.10 22",
+        "output": "Connection to 10.0.0.10 22 port [tcp/*] succeeded!"
+      },
+      {
+        "command": "nc -zv -w3 10.0.0.10 8080",
+        "output": "nc: connect to 10.0.0.10 port 8080 (tcp) timed out: Operation now in progress"
+      },
+      {
+        "command": "curl -sS -m3 http://10.0.0.10:8000",
+        "output": "curl: (28) Connection timed out after 3003 milliseconds"
+      },
+      {
+        "command": "ping -c1 -W1 10.0.0.10",
+        "output": "PING 10.0.0.10 (10.0.0.10) 56(84) bytes of data.\n\n--- 10.0.0.10 ping statistics ---\n1 packets transmitted, 0 received, 100% packet loss, time 0ms"
+      }
+    ]
+  },
+  {
+    "name": "B-dnat",
+    "host": "servidor",
+    "section": "Problema 1 — Sintaxis del DNAT",
+    "caption": "La regla DNAT de la consigna falla; con la dirección explícita se aplica",
+    "steps": [
+      {
+        "command": "nft add chain inet filtro prerouting '{ type nat hook prerouting priority -100; }'",
+        "output": ""
+      },
+      {
+        "command": "nft add rule inet filtro prerouting tcp dport 80 dnat ip to :8000",
+        "output": "Error: syntax error, unexpected colon\nadd rule inet filtro prerouting tcp dport 80 dnat ip to :8000\n                                                        ^"
+      },
+      {
+        "command": "nft add rule inet filtro prerouting tcp dport 80 dnat ip to 10.0.0.10:8000",
+        "output": ""
+      }
+    ]
+  },
+  {
+    "name": "B-80-bloqueado",
+    "host": "atacante",
+    "section": "Problema 2 — La cadena input descarta el tráfico ya traducido",
+    "caption": "Con el DNAT corregido, el 80 sigue sin responder",
+    "steps": [
+      {
+        "command": "curl -sS -m3 http://10.0.0.10:80",
+        "output": "curl: (28) Connection timed out after 3001 milliseconds"
+      }
+    ]
+  },
+  {
+    "name": "B-ct-status",
+    "host": "servidor",
+    "section": "B.1 — Verificación desde el atacante",
+    "caption": "Regla que acepta solo las conexiones que entraron por el DNAT",
+    "steps": [
+      {
+        "command": "nft add rule inet filtro entrada ct status dnat accept",
+        "output": ""
+      }
+    ]
+  },
+  {
+    "name": "B-verificacion",
+    "host": "atacante",
+    "section": "B.1 — Verificación desde el atacante",
+    "caption": "El 80 responde a través del DNAT; el 8000 directo sigue bloqueado",
+    "steps": [
+      {
+        "command": "curl -sS -m3 http://10.0.0.10:80",
+        "output": "TP5 servicio interno (puerto 8000)"
+      },
+      {
+        "command": "curl -sS -m3 http://10.0.0.10:8000",
+        "output": "curl: (28) Connection timed out after 3003 milliseconds"
+      }
+    ]
+  },
+  {
+    "name": "B-conntrack",
+    "host": "servidor",
+    "section": "B.1 — Verificación desde el atacante",
+    "caption": "Tabla de conexiones: ida al puerto 80, respuesta desde el 8000",
+    "steps": [
+      {
+        "command": "conntrack -L -p tcp --orig-port-dst 80",
+        "output": "conntrack v1.4.8 (conntrack-tools): 1 flow entries have been shown.\ntcp      6 116 TIME_WAIT src=10.0.0.5 dst=10.0.0.10 sport=42106 dport=80 src=10.0.0.10 dst=10.0.0.5 sport=8000 dport=42106 [ASSURED] mark=0 use=1"
+      }
+    ]
+  },
+  {
+    "name": "C-nmap",
+    "host": "atacante",
+    "section": "C.1 — Alertas generadas",
+    "caption": "Escaneo de la Unidad 3 contra el servidor, con el firewall activo",
+    "steps": [
+      {
+        "command": "nmap -sS -sV 10.0.0.10",
+        "output": "Starting Nmap 7.95 ( https://nmap.org ) at 2026-11-21 18:46 UTC\nNmap scan report for tp5-server-1.tp5_lab (10.0.0.10)\nHost is up (0.000095s latency).\nNot shown: 998 filtered tcp ports (no-response)\nPORT   STATE SERVICE VERSION\n22/tcp open  ssh     OpenSSH 10.0p2 Debian 7+deb13u4 (protocol 2.0)\n80/tcp open  http    SimpleHTTPServer 0.6 (Python 3.13.5)\nMAC Address: 36:34:B6:DD:52:13 (Unknown)\nService Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel\n\nService detection performed. Please report any incorrect results at https://nmap.org/submit/ .\nNmap done: 1 IP address (1 host up) scanned in 10.86 seconds"
+      }
+    ]
+  },
+  {
+    "name": "C-fastlog",
+    "host": "servidor",
+    "section": "C.1 — Alertas generadas",
+    "caption": "Alertas de Suricata generadas por el escaneo (fast.log)",
+    "steps": [
+      {
+        "command": "cat /var/log/suricata/fast.log",
+        "output": "11/21/2026-18:46:46.645367  [**] [1:2034636:2] ET INFO Python SimpleHTTP ServerBanner [**] [Classification: Misc activity] [Priority: 3] {TCP} 10.0.0.10:80 -> 10.0.0.5:54070\n11/21/2026-18:46:46.659886  [**] [1:2024364:5] ET SCAN Possible Nmap User-Agent Observed [**] [Classification: Web Application Attack] [Priority: 1] {TCP} 10.0.0.5:54076 -> 10.0.0.10:80\n11/21/2026-18:46:46.659898  [**] [1:2034636:2] ET INFO Python SimpleHTTP ServerBanner [**] [Classification: Misc activity] [Priority: 3] {TCP} 10.0.0.10:80 -> 10.0.0.5:54076\n11/21/2026-18:46:46.660439  [**] [1:2034636:2] ET INFO Python SimpleHTTP ServerBanner [**] [Classification: Misc activity] [Priority: 3] {TCP} 10.0.0.10:80 -> 10.0.0.5:54090\n11/21/2026-18:46:46.660484  [**] [1:2024364:5] ET SCAN Possible Nmap User-Agent Observed [**] [Classification: Web Application Attack] [Priority: 1] {TCP} 10.0.0.5:54106 -> 10.0.0.10:80\n11/21/2026-18:46:46.660541  [**] [1:2034636:2] ET INFO Python SimpleHTTP ServerBanner [**] [Classification: Misc activity] [Priority: 3] {TCP} 10.0.0.10:80 -> 10.0.0.5:54106\n11/21/2026-18:46:46.662591  [**] [1:2024364:5] ET SCAN Possible Nmap User-Agent Observed [**] [Classification: Web Application Attack] [Priority: 1] {TCP} 10.0.0.5:54112 -> 10.0.0.10:80\n11/21/2026-18:46:46.662779  [**] [1:2024364:5] ET SCAN Possible Nmap User-Agent Observed [**] [Classification: Web Application Attack] [Priority: 1] {TCP} 10.0.0.5:54114 -> 10.0.0.10:80\n11/21/2026-18:46:46.662672  [**] [1:2034636:2] ET INFO Python SimpleHTTP ServerBanner [**] [Classification: Misc activity] [Priority: 3] {TCP} 10.0.0.10:80 -> 10.0.0.5:54112\n11/21/2026-18:46:46.662795  [**] [1:2034636:2] ET INFO Python SimpleHTTP ServerBanner [**] [Classification: Misc activity] [Priority: 3] {TCP} 10.0.0.10:80 -> 10.0.0.5:54114\n11/21/2026-18:46:46.666144  [**] [1:2034636:2] ET INFO Python SimpleHTTP ServerBanner [**] [Classification: Misc activity] [Priority: 3] {TCP} 10.0.0.10:80 -> 10.0.0.5:54124\n11/21/2026-18:46:46.667337  [**] [1:2034636:2] ET INFO Python SimpleHTTP ServerBanner [**] [Classification: Misc activity] [Priority: 3] {TCP} 10.0.0.10:80 -> 10.0.0.5:54136"
+      }
+    ]
+  },
+  {
+    "name": "C-evasion",
+    "host": "atacante",
+    "section": "C.3 — ¿Firmas o anomalías?",
+    "caption": "Mismo escaneo con otro User-Agent",
+    "steps": [
+      {
+        "command": "nmap -sS -sV --script-args http.useragent=Mozilla/5.0 10.0.0.10 | tail -n 6",
+        "output": "80/tcp open  http    SimpleHTTPServer 0.6 (Python 3.13.5)\nMAC Address: 36:34:B6:DD:52:13 (Unknown)\nService Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel\n\nService detection performed. Please report any incorrect results at https://nmap.org/submit/ .\nNmap done: 1 IP address (1 host up) scanned in 11.06 seconds"
+      }
+    ]
+  },
+  {
+    "name": "C-evasion-alertas",
+    "host": "servidor",
+    "section": "C.3 — ¿Firmas o anomalías?",
+    "caption": "Con el User-Agent cambiado, la firma de Nmap no se dispara",
+    "steps": [
+      {
+        "command": "grep -c \"Nmap User-Agent\" /var/log/suricata/fast.log",
+        "output": "0"
+      },
+      {
+        "command": "grep -c \"SimpleHTTP\" /var/log/suricata/fast.log",
+        "output": "8"
+      }
+    ]
+  },
+  {
+    "name": "D-ataque",
+    "host": "atacante",
+    "section": "Parte D — Honeypot (Cowrie)",
+    "caption": "Intentos de login SSH contra el honeypot y comandos tras el acceso",
+    "steps": [
+      {
+        "command": "sshpass -p root ssh root@10.0.0.20 'uname -a'",
+        "output": "Permission denied, please try again."
+      },
+      {
+        "command": "sshpass -p 123456 ssh root@10.0.0.20 'uname -a'",
+        "output": "Permission denied, please try again."
+      },
+      {
+        "command": "sshpass -p toor ssh root@10.0.0.20 'uname -a; whoami; cat /etc/passwd'",
+        "output": "Linux srv-backup 6.1.0-21-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.90-1 (2024-05-03) x86_64 GNU/Linux\nroot\nroot:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/bin/sh\nbin:x:2:2:bin:/bin:/bin/sh\nsys:x:3:3:sys:/dev:/bin/sh\nsync:x:4:65534:sync:/bin:/bin/sync\ngames:x:5:60:games:/usr/games:/bin/sh\nman:x:6:12:man:/var/cache/man:/bin/sh\nlp:x:7:7:lp:/var/spool/lpd:/bin/sh\nmail:x:8:8:mail:/var/mail:/bin/sh\nnews:x:9:9:news:/var/spool/news:/bin/sh\nuucp:x:10:10:uucp:/var/spool/uucp:/bin/sh\nproxy:x:13:13:proxy:/bin:/bin/sh\nwww-data:x:33:33:www-data:/var/www:/bin/sh\nbackup:x:34:34:backup:/var/backups:/bin/sh\nlist:x:38:38:Mailing List Manager:/var/list:/bin/sh\nirc:x:39:39:ircd:/var/run/ircd:/bin/sh\ngnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/bin/sh\nnobody:x:65534:65534:nobody:/nonexistent:/bin/sh\nlibuuid:x:100:101::/var/lib/libuuid:/bin/sh\nsshd:x:101:65534::/var/run/sshd:/usr/sbin/nologin\nphil:x:1000:1000:Phil California,,,:/home/phil:/bin/bash"
+      }
+    ]
+  },
+  {
+    "name": "D-cowrie-log",
+    "host": "honeypot",
+    "section": "D.1 — Qué registró Cowrie",
+    "caption": "Registro de la sesión en el honeypot (campo message de cowrie.json)",
+    "steps": [
+      {
+        "command": "grep -o '\"message\":\"[^\"]*\"' var/log/cowrie/cowrie.json | grep -E \"New connection|login attempt|CMD\" | grep -v 127.0.0.1 | tail -n 7",
+        "output": "\"message\":\"New connection: 10.0.0.5:59690 (10.0.0.20:22) [session: 5bd309ab4122]\"\n\"message\":\"login attempt [root/root] failed\"\n\"message\":\"New connection: 10.0.0.5:37574 (10.0.0.20:22) [session: 195d3ee814f5]\"\n\"message\":\"login attempt [root/123456] failed\"\n\"message\":\"New connection: 10.0.0.5:37580 (10.0.0.20:22) [session: a8e6abed1168]\"\n\"message\":\"login attempt [root/toor] succeeded\"\n\"message\":\"CMD: uname -a; whoami; cat /etc/passwd\""
+      }
+    ]
+  },
+  {
+    "name": "O-translate",
+    "host": "servidor",
+    "section": "Migrar reglas de iptables a nftables",
+    "caption": "Traducción de reglas iptables a nftables con iptables-translate",
+    "steps": [
+      {
+        "command": "iptables-translate -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT",
+        "output": "nft 'add rule ip filter INPUT ct state related,established counter accept'"
+      },
+      {
+        "command": "iptables-translate -A INPUT -i lo -j ACCEPT",
+        "output": "nft 'add rule ip filter INPUT iifname \"lo\" counter accept'"
+      },
+      {
+        "command": "iptables-translate -A INPUT -p tcp --dport 22 -j ACCEPT",
+        "output": "nft 'add rule ip filter INPUT tcp dport 22 counter accept'"
+      },
+      {
+        "command": "iptables-translate -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.0.0.10:8000",
+        "output": "nft 'add rule ip nat PREROUTING tcp dport 80 counter dnat to 10.0.0.10:8000'"
+      }
+    ]
+  }
+]
