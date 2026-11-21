@@ -1,0 +1,213 @@
+
+######## A.1
+@@CMD
+echo "rocommunity catedra" | tee -a /etc/snmp/snmpd.conf
+@@OUT
+rocommunity catedra
+@@END
+@@CMD
+systemctl restart snmpd 2>/dev/null || { pkill snmpd; sleep 1; snmpd -Lsd -Lf /var/log/snmpd.log -p /run/snmpd.pid; }; sleep 2; pgrep -a snmpd
+@@OUT
+25 snmpd -Lsd -Lf /var/log/snmpd.log -p /run/snmpd.pid
+@@END
+@@CMD
+snmpwalk -v2c -c catedra localhost | head -20
+@@OUT
+SNMPv2-MIB::sysDescr.0 = STRING: Linux kali 7.0.0-43-generic #43-Ubuntu SMP PREEMPT_DYNAMIC Fri Oct 23 13:25:25 UTC 2026 x86_64
+SNMPv2-MIB::sysObjectID.0 = OID: NET-SNMP-MIB::netSnmpAgentOIDs.10
+DISMAN-EVENT-MIB::sysUpTimeInstance = Timeticks: (203) 0:00:02.03
+SNMPv2-MIB::sysContact.0 = STRING: fsoler@kali
+SNMPv2-MIB::sysName.0 = STRING: kali
+SNMPv2-MIB::sysLocation.0 = STRING: Laboratorio ARyS - UNPSJB Trelew
+SNMPv2-MIB::sysServices.0 = INTEGER: 72
+SNMPv2-MIB::sysORLastChange.0 = Timeticks: (0) 0:00:00.00
+SNMPv2-MIB::sysORID.1 = OID: SNMP-FRAMEWORK-MIB::snmpFrameworkMIBCompliance
+SNMPv2-MIB::sysORID.2 = OID: SNMP-MPD-MIB::snmpMPDCompliance
+SNMPv2-MIB::sysORID.3 = OID: SNMP-USER-BASED-SM-MIB::usmMIBCompliance
+SNMPv2-MIB::sysORID.4 = OID: SNMPv2-MIB::snmpMIB
+SNMPv2-MIB::sysORID.5 = OID: SNMP-VIEW-BASED-ACM-MIB::vacmBasicGroup
+SNMPv2-MIB::sysORID.6 = OID: TCP-MIB::tcpMIB
+SNMPv2-MIB::sysORID.7 = OID: UDP-MIB::udpMIB
+SNMPv2-MIB::sysORID.8 = OID: IP-MIB::ip
+SNMPv2-MIB::sysORID.9 = OID: SNMP-NOTIFICATION-MIB::snmpNotifyFullCompliance
+SNMPv2-MIB::sysORID.10 = OID: NOTIFICATION-LOG-MIB::notificationLogMIB
+SNMPv2-MIB::sysORDescr.1 = STRING: The SNMP Management Architecture MIB.
+SNMPv2-MIB::sysORDescr.2 = STRING: The MIB for Message Processing and Dispatching.
+@@END
+@@CMD
+snmpget -v2c -c catedra localhost sysDescr.0
+@@OUT
+SNMPv2-MIB::sysDescr.0 = STRING: Linux kali 7.0.0-43-generic #43-Ubuntu SMP PREEMPT_DYNAMIC Fri Oct 23 13:25:25 UTC 2026 x86_64
+@@END
+@@CMD
+snmpget -v2c -c catedra localhost sysUpTime.0
+@@OUT
+DISMAN-EVENT-MIB::sysUpTimeInstance = Timeticks: (208) 0:00:02.08
+@@END
+@@CMD
+snmpget -v2c -c catedra localhost sysName.0 sysLocation.0 sysContact.0
+@@OUT
+SNMPv2-MIB::sysName.0 = STRING: kali
+SNMPv2-MIB::sysLocation.0 = STRING: Laboratorio ARyS - UNPSJB Trelew
+SNMPv2-MIB::sysContact.0 = STRING: fsoler@kali
+@@END
+
+######## A.2
+@@CMD
+tcpdump -i lo -w snmp.pcap udp port 161 2>/dev/null & sleep 1; snmpget -v2c -c catedra localhost sysDescr.0; sleep 1; kill %1; sleep 1; ls -l snmp.pcap
+@@OUT
+SNMPv2-MIB::sysDescr.0 = STRING: Linux kali 7.0.0-43-generic #43-Ubuntu SMP PREEMPT_DYNAMIC Fri Oct 23 13:25:25 UTC 2026 x86_64
+-rw-r--r-- 1 tcpdump tcpdump 323 Nov 21 18:13 snmp.pcap
+@@END
+@@CMD
+tshark -r snmp.pcap -Y snmp -T fields -e frame.number -e ip.src -e ip.dst -e snmp.version -e snmp.community 2>/dev/null
+@@OUT
+1	127.0.0.1	127.0.0.1	1	catedra
+2	127.0.0.1	127.0.0.1	1	catedra
+@@END
+@@CMD
+tshark -r snmp.pcap -Y "snmp && frame.number==1" -V 2>/dev/null | sed -n "/Simple Network Management Protocol/,\$p"
+@@OUT
+Simple Network Management Protocol
+    version: v2c (1)
+    community: catedra
+    data: get-request (0)
+        get-request
+            request-id: 846415624
+            error-status: noError (0)
+            error-index: 0
+            variable-bindings: 1 item
+                1.3.6.1.2.1.1.1.0: Value (Null)
+                    Object Name: 1.3.6.1.2.1.1.1.0 (iso.3.6.1.2.1.1.1.0)
+                    Value (Null)
+
+@@END
+@@CMD
+grep -a -o catedra snmp.pcap
+@@OUT
+catedra
+catedra
+@@END
+@@CMD
+pkill snmpd; sleep 1; net-snmp-create-v3-user -ro -A authpass123 -X privpass123 -a SHA -x AES tp8user | tail -3; snmpd -Lsd -Lf /var/log/snmpd.log -p /run/snmpd.pid; sleep 2
+@@OUT
+   createUser tp8user SHA "authpass123" AES "privpass123"
+adding the following line to /etc/snmp/snmpd.conf:
+   rouser tp8user
+@@END
+@@CMD
+tcpdump -i lo -w snmp-v3.pcap udp port 161 2>/dev/null & sleep 1; snmpget -v3 -l authPriv -u tp8user -a SHA -A authpass123 -x AES -X privpass123 localhost sysDescr.0; sleep 1; kill %1; sleep 1; ls -l snmp-v3.pcap
+@@OUT
+SNMPv2-MIB::sysDescr.0 = STRING: Linux kali 7.0.0-43-generic #43-Ubuntu SMP PREEMPT_DYNAMIC Fri Oct 23 13:25:25 UTC 2026 x86_64
+-rw-r--r-- 1 tcpdump tcpdump 815 Nov 21 18:13 snmp-v3.pcap
+@@END
+@@CMD
+tshark -r snmp-v3.pcap -Y snmp -V 2>/dev/null | grep -E "msgAuthoritativeEngineID|msgUserName|msgPrivacyParameters|msgData|encryptedPDU|sysDescr|catedra|Linux"
+@@OUT
+    msgAuthoritativeEngineID: <MISSING>
+    msgUserName: 
+    msgPrivacyParameters: <MISSING>
+    msgData: plaintext (0)
+    msgAuthoritativeEngineID: 80001f888012bde90d2bdf016b00000000
+    msgUserName: 
+    msgPrivacyParameters: <MISSING>
+    msgData: plaintext (0)
+    msgAuthoritativeEngineID: 80001f888012bde90d2bdf016b00000000
+    msgUserName: tp8user
+    msgPrivacyParameters: 9e0201ccda71d923
+    msgData: encryptedPDU (1)
+        encryptedPDU: 95485806dcb02957467b78d93a1d68fa7543aa95d14b8160d9377030ccb9d8852e8b1235…
+    msgAuthoritativeEngineID: 80001f888012bde90d2bdf016b00000000
+    msgUserName: tp8user
+    msgPrivacyParameters: cfefabcb485b6167
+    msgData: encryptedPDU (1)
+        encryptedPDU: 0f90d097585434f0408b9d11127751835fb2ec069e9019d6a1a11973a3dd1e17f4a0b985…
+@@END
+@@CMD
+grep -a -ciE "catedra|sysDescr|Linux kali" snmp-v3.pcap
+@@OUT
+0
+@@END
+
+######## B
+@@CMD
+cat > /etc/rsyslog.d/tp8.conf <<CONF
+template(name="sev" type="string" string="%syslogseverity% (%syslogseverity-text%) %syslogfacility-text% %programname%: %msg%\n")
+user.* /var/log/tp8-severidades.log;sev
+CONF
+rsyslogd 2>/dev/null; sleep 1; pgrep -a rsyslogd
+@@OUT
+75 rsyslogd
+@@END
+@@CMD
+logger -p user.info  "Prueba INFO desde el TP8"
+logger -p user.err   "Prueba ERROR desde el TP8"
+@@OUT
+@@END
+@@CMD
+tail -n 20 /var/log/syslog | grep "TP8"
+@@OUT
+2026-11-21T18:13:11.684028+00:00 kali root: Prueba INFO desde el TP8
+2026-11-21T18:13:11.686046+00:00 kali root: Prueba ERROR desde el TP8
+@@END
+@@CMD
+cat /var/log/tp8-severidades.log
+@@OUT
+6 (info) user root:  Prueba INFO desde el TP8
+3 (err) user root:  Prueba ERROR desde el TP8
+@@END
+
+######## C
+@@CMD
+curl -s http://prometheus:9090/-/ready; curl -s http://grafana:3000/api/health | jq -c .
+@@OUT
+Prometheus Server is Ready.
+{"database":"ok","version":"13.3.1","commit":"da3aa3ff574e7dbbf808c66b6daa744defed0441"}
+@@END
+@@CMD
+curl -s 'http://prometheus:9090/api/v1/query?query=up' | jq .
+@@OUT
+{
+  "status": "success",
+  "data": {
+    "resultType": "vector",
+    "result": [
+      {
+        "metric": {
+          "__name__": "up",
+          "instance": "localhost:9090",
+          "job": "prometheus"
+        },
+        "value": [
+          1795284791.719,
+          "1"
+        ]
+      }
+    ]
+  }
+}
+@@END
+@@CMD
+curl -s 'http://prometheus:9090/api/v1/targets' | jq '.data.activeTargets[] | {job: .labels.job, instance: .labels.instance, health: .health}'
+@@OUT
+{
+  "job": "prometheus",
+  "instance": "localhost:9090",
+  "health": "up"
+}
+@@END
+@@CMD
+curl -s -u admin:admin -H 'Content-Type: application/json' -X POST http://grafana:3000/api/datasources -d '{"name":"Prometheus","type":"prometheus","url":"http://prometheus:9090","access":"proxy","isDefault":true}' | jq '{message, name: .datasource.name, type: .datasource.type, url: .datasource.url}'
+@@OUT
+{
+  "message": "Datasource added",
+  "name": "Prometheus",
+  "type": "prometheus",
+  "url": "http://prometheus:9090"
+}
+@@END
+@@CMD
+UID_DS=$(curl -s -u admin:admin http://grafana:3000/api/datasources/name/Prometheus | jq -r .uid); curl -s -u admin:admin "http://grafana:3000/api/datasources/proxy/uid/$UID_DS/api/v1/query?query=up" | jq -c '.data.result[] | {job: .metric.job, up: .value[1]}'
+@@OUT
+{"job":"prometheus","up":"1"}
+@@END

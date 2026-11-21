@@ -1,0 +1,19 @@
+# TP8 lab. Run from tp/tp8:  docker compose up -d --build
+name: tp8
+services:
+  lab:
+    build: ./lab
+    hostname: kali
+    init: true                      # reaps snmpd's forked parent (no zombies)
+    cap_add: [NET_RAW, NET_ADMIN]   # tcpdump on lo
+    volumes: ["./work:/lab"]
+  prometheus:
+    image: prom/prometheus
+    volumes: ["./lab/prometheus.yml:/etc/prometheus/prometheus.yml:ro"]
+    ports: ["127.0.0.1:9090:9090"]
+  grafana:
+    image: grafana/grafana
+    environment:   # lab only (bound to 127.0.0.1): lets headless screenshots skip the login form
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+    ports: ["127.0.0.1:3000:3000"]
