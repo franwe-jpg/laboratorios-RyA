@@ -1,0 +1,7 @@
+{
+  "name": "tp5",
+  "private": true,
+  "dependencies": {
+    "docx": "^9.7.1"
+  }
+}

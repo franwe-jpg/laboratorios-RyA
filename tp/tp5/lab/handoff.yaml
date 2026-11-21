@@ -1,0 +1,87 @@
+# Infrastructure -> report contract for TP5 (arys-practical-lab-design handoff).
+# The report imports lab/ops.py, calls these operations and renders the typed
+# results. It never runs Compose lifecycle and never parses console output.
+version: 1
+practical: TP5
+lifecycle:
+  up: python lab/ops.py up          # build + start, waits for semantic health
+  validate: python lab/ops.py validate
+  down: python lab/ops.py down      # removes containers/network; log volumes kept
+services:
+  - {id: attacker, role: "atacante (nmap, curl, ssh)", address: 10.0.0.5, health_operation: lab.health}
+  - {id: server, role: "servidor: nftables, sshd, http.server 8000", address: 10.0.0.10, health_operation: lab.health}
+  - {id: ids, role: "Suricata IDS, sidecar on the server namespace (eth1)", address: 10.0.0.10, health_operation: lab.health}
+  - {id: honeypot, role: "Cowrie SSH honeypot on port 22", address: 10.0.0.20, health_operation: lab.health}
+run:
+  constructor: ops.Run.new()        # one non-overwriting evidence directory per run
+  evidence_root: evidence/runs/<run-id>/
+operations:
+  - id: lab.health
+    call: ops.health(run)
+    result_schema: {verdict: valid | invalid, fields: [services: [servicio, estado, salud]]}
+  - id: lab.isolation
+    call: ops.isolation(run)
+    result_schema: {verdict: valid | invalid, fields: [checks: [flujo, esperado, observado, ok]]}
+  - id: fw.reset
+    call: ops.fw_reset(run)
+    display_label: Restaurar el servidor sin firewall
+    result_schema: {verdict: valid}
+    note: deletes only `table inet filtro`; Docker's embedded-DNS `ip nat` table is kept
+  - id: fw.nft
+    call: ops.nft(run, command)
+    academic_command: the nft command itself (ops.PART_A, PART_B_* constants)
+    result_schema: {verdict: valid | invalid, fields: [command, error, error_detail]}
+    note: error_detail is shown only when the error is the phenomenon being taught (Part B syntax)
+  - id: fw.table
+    call: ops.fw_table(run)
+    academic_command: nft list table inet filtro
+    result_schema: {verdict: valid | invalid, fields: [table, all_tables]}
+    evidence: [{type: artifact, relative_path: evidence/runs/<run-id>/part-a/ruleset.nft, sha256_required: true}]
+  - id: probe.tcp
+    call: ops.probe_tcp(run, port, host=10.0.0.10)
+    academic_command: nc -zv -w3 <host> <port>
+    result_schema: {verdict: allowed | refused | blocked, fields: [port, host, detail, elapsed_s]}
+  - id: probe.http
+    call: ops.probe_http(run, port)
+    academic_command: curl http://10.0.0.10:<port>
+    result_schema: {verdict: allowed | refused | blocked, fields: [port, detail]}
+  - id: probe.ping
+    call: ops.probe_ping(run)
+    academic_command: ping -c1 10.0.0.10
+    result_schema: {verdict: allowed | blocked, fields: [host, detail]}
+  - id: nat.conntrack
+    call: ops.conntrack(run, dport=80)
+    academic_command: conntrack -L -p tcp --orig-port-dst 80
+    result_schema: {verdict: translated | not_translated, fields: [entries: ["ida (original)", "vuelta (respuesta)"]]}
+    evidence: [{type: table, relative_path: evidence/runs/<run-id>/part-b/conntrack.txt, sha256_required: true}]
+  - id: fw.translate
+    call: ops.translate(run, rule)
+    academic_command: iptables-translate <rule>
+    result_schema: {verdict: valid | invalid, fields: [iptables, nftables]}
+  - id: ids.scan
+    call: ops.ids_scan(run, extra=None, label=scan)
+    academic_command: nmap -sS -sV 10.0.0.10
+    timeout_seconds: 300
+    result_schema:
+      verdict: detected | not_detected
+      fields: [scan_completed, duration_s, ports: [puerto, estado, servicio, versión], filtered_ports,
+               alerts: [sid, firma, prioridad, cantidad, sentido]]
+    evidence:
+      - {type: artifact, relative_path: evidence/runs/<run-id>/part-c/<label>-nmap.xml, sha256_required: true}
+      - {type: json, relative_path: evidence/runs/<run-id>/part-c/<label>-alerts.json, sha256_required: true}
+  - id: honeypot.attack
+    call: ops.honeypot_attack(run, passwords, commands)
+    academic_command: ssh root@10.0.0.20
+    result_schema:
+      verdict: recorded | not_recorded
+      fields: [attempts: [contraseña, resultado, respuesta], events: [hora, sesión, origen, evento, detalle]]
+    evidence: [{type: json, relative_path: evidence/runs/<run-id>/part-d/cowrie-events.json, sha256_required: true}]
+    note: healthcheck sessions from 127.0.0.1 are excluded from events (kept in the raw artifact)
+common:
+  diagnostic_record:
+    relative_path: evidence/runs/<run-id>/diagnostics/<seq>-<op>.json
+    fields: [service, argv, stdout, stderr, exit_code, duration_seconds]
+    student_facing: false
+  restore_operation: fw.reset   # call in `finally` after each scenario
+presentation:
+  forbidden: [absolute_host_paths, raw_compose_wrappers, unbounded_stdout, routine_exit_and_duration_lines]

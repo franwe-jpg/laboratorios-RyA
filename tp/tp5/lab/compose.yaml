@@ -1,0 +1,79 @@
+# TP5 lab: host-firewall topology faithful to the assignment commands.
+# Single isolated L2 network, no Internet egress, no ports published on the host.
+# Lifecycle (build/up/down) is driven from the terminal via lab/ops.py, never
+# from the report notebook.
+name: tp5
+
+networks:
+  lab:
+    internal: true
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24
+
+services:
+  attacker:
+    build: ./attacker
+    hostname: atacante
+    networks:
+      lab:
+        ipv4_address: 10.0.0.5
+        interface_name: eth1
+
+  server:
+    build: ./server
+    hostname: servidor
+    # NET_ADMIN is kept on purpose: the student applies nftables rules live.
+    cap_add: [NET_ADMIN]
+    networks:
+      lab:
+        ipv4_address: 10.0.0.10
+        interface_name: eth1
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import socket; [socket.create_connection(('127.0.0.1', p), 2).close() for p in (22, 8000)]"]
+      interval: 2s
+      retries: 15
+
+  ids:
+    build: ./ids
+    # Sidecar sharing the server network namespace: "Suricata on the server VM".
+    network_mode: service:server
+    cap_add: [NET_ADMIN, NET_RAW, SYS_NICE]
+    volumes:
+      - suricata-logs:/var/log/suricata
+    depends_on:
+      server:
+        condition: service_healthy
+    healthcheck:
+      # Healthy only once the ruleset is loaded and capture threads are running.
+      test: ["CMD", "grep", "-q", "Engine started", "/var/log/suricata/suricata.log"]
+      interval: 3s
+      retries: 40
+
+  honeypot:
+    image: cowrie/cowrie:v3.1.7@sha256:e7c4b4fe5fbb874e682c6c0c7a1daf1c3183c622d5cc2d281f453c1c4d9f97ac
+    hostname: srv-backup
+    cap_drop: [ALL]
+    # Lets the unprivileged cowrie user bind port 22 inside its own namespace.
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: "0"
+    environment:
+      COWRIE_SSH_LISTEN_ENDPOINTS: "tcp:22:interface=0.0.0.0"
+      COWRIE_HONEYPOT_HOSTNAME: "srv-backup"
+    networks:
+      lab:
+        ipv4_address: 10.0.0.20
+        interface_name: eth1
+    volumes:
+      - cowrie-logs:/cowrie/cowrie-git/var/log/cowrie
+    healthcheck:
+      # Each probe opens a Cowrie session from 127.0.0.1: probe fast only while
+      # starting, then rarely; ops.py also filters those sessions out.
+      test: ["CMD", "/cowrie/cowrie-env/bin/python3", "-c", "import socket; socket.create_connection(('127.0.0.1', 22), 2).close()"]
+      start_period: 40s
+      start_interval: 2s
+      interval: 300s
+
+volumes:
+  suricata-logs:
+  cowrie-logs:

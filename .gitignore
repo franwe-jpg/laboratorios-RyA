@@ -9,3 +9,8 @@ tp/*/TP1.pdf
 tp/*/page-*.jpg
 tp/*/work/
 .~lock.*#
+
+# TP5 notebook tooling (local venv, executed intermediate copy)
+tp/tp5/.venv/
+tp/tp5/build/
+tp/tp5/evidence/runs/
